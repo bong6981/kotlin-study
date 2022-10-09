@@ -485,3 +485,43 @@ fun recognize(c:Char) = when(c) {
 ```kotlin
   println("Kotlin" in setOf("Java","Scala"))
  ```
+
+# 2.5 코틀린의 예외 처리 
+- 예외를 만들 때도 new를 붙일 필요가 없다 
+- 자바와 달리 throw는 식이므로 다른 식에 포함될 수 있다 
+```kotlin
+  val percentage =
+  if (number in 0..100)
+    number
+  else
+    throw IllegalArgumentException( // throw는 식이다
+      "a percentage value must be between 0 and 100 : $number"
+    )
+```
+
+## 2.5.1 try, catch, finally 
+```kotlin
+fun readNumber(reader: BufferedReader) : Int? {
+    try {
+        val line = reader.readLine()
+        return Integer.parseInt(line)
+    }
+    catch (e: NumberFormatException) {
+        return null
+    }
+    finally {
+        reader.close()
+    }
+}
+
+```
+- 자바 코드와 다른 점은 throws절이 코드에 없다는 점 
+  - 자바에서는 함수를 선언한 뒤에 throws IOExcpetion 붙여야 한다 
+  - IOExcpetion이 체크 예외 이기 때문
+  - 그 함수가 호출한 다른 함수에서 발생할 수 있는 예외를 모두 catch로 처리하거나 throws로 명시해야 한다
+- 코틀린은 체크 예외와 언체크 예외를 구별하지 않는다 
+  - 잡아도 되고 안잡아도 된다
+- try-with-resources를 위한 특별한 문법이 ㅗ틀린에는 없다 
+  - 라이브러리 함수로 가능 기능 구현 가능 8.2.5
+
+## 2.5.2 try를 식으로 사용 

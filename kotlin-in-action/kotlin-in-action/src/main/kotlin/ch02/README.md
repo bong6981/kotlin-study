@@ -340,4 +340,148 @@ fun eval(e: Expr): Int =
 - when 식을 값 동등성 말고도 이것처럼 분기로 쓸 수 있다
 - is Num 하면 스마트 캐스트가 이뤄진다 
 
-## 2.3.7 if와 when의 분기에서 블록 사용
+## 2.3.7 if와 when의 분기에서 블록 
+```kotlin
+fun evalWithLogging(e: Expr): Int =
+    when (e) {
+        is Num -> {
+            println("num: ${e.value}")
+            e.value
+        }
+
+        is Sum -> {
+            val left = evalWithLogging(e.left)
+            val right = evalWithLogging(e.right)
+            println("sum : $left + $right")
+            left + right
+        }
+
+        else -> throw IllegalArgumentException("Unknown expression")
+    }
+```
+- 블록의 마지막 식이 블록의 결과라는 규칙은 블록이 값을 만들어내야 하는 경우 성립
+- 하지만 이 규칙은 함수에 대해서는 성립하지 않는다
+  - 식이 본문인 함수는 블록을 본문으로 가질 수 없고
+  - 블록이 본문인 함수는 내부에 return문이 반드시 있어야 한다 
+
+# 2.4 대상을 이터레이션 : while과 for 루프 
+- for는 자바의 for-each루프에 해당하는 형태만 존재 
+  - for <아이템> in <원소들> 
+
+## 2.4.1 while 루프 
+- 코틀린에는 while, do-while 루프가 있다 
+```kotlin
+while (조건) {
+    /*...*/
+}
+
+do {
+  /*...*/
+} while (조건)
+```
+
+## 2.4.2 수에 대한 이터레이션: 범위와 수열 
+- 코틀린에서는 자바의 for루프에 해당하는 (어떤 변수를 초기화하고 그 변수를 루프를 한 번 실행할 때마다 갱신하고 루프 조건이 거짓이 될 때 반복을 끝내는 형태의 루프)에 해당하는 요소가 없다
+- 이런 루프의 가장 흔한 용례인 초깃값, 증가값, 최종값을 사용한 루프를 대신하기 위해 코틀린에서는 범위 range를 사용 
+- 범위는 기본적으로 두 값으로 이뤄진 구잔 
+  - 보통 그 두 값은 정수 등의 숫자 타입의 값이며
+  - .. 연산자로 시작 값과 끝 값은 연결해서 범위를 만든다 
+- 코틀린에서 범위는 폐구간(닫힌 구간) 또는 양끝을 포함하는 구간
+```kotlin
+val oneToTen = 1..10
+```
+- 두번째 값(10)이 항상 범위에 포함된다. 
+```kotlin
+fun fizzBuzz(i: Int) = when {
+    i % 15 == 0 -> "FizzBuzz"
+    i % 3 == 0 -> "Fizz"
+    i % 5 == 0 -> "Buzz"
+    else -> "$i"
+}
+
+/** for (i in 1..100) {
+ *  ... print(fizzBuzz(i))
+ * }
+ */
+
+```
+- 증가 값을 갖고 범위 이터레션 하기 
+```kotlin
+/** for (i in 100 downTo 1 step 2) {
+ *  ... print(fizzBuzz(i))
+ * }
+ */
+// 98, 94, 92 ... 
+```
+- 증가 값 step을 갖는 수열에 대한 이터레이션
+- 증가 값을 음수로 만들면 역방향 수열
+  - 여기서는 100 downTo 1이 역방향 수열을 만든다 
+  - 역방향 수열의 기본 증가 값은 -1
+  - 그 뒤에 step2를 붙이면 증가 값의 절대값이 저절로 2로 바뀐다
+  - 따라서 증가값의 방향은 -2
+- ..는 항상 범위의 끝값(우항)을 포함
+  - 하지만 끝 ㄱ밧을 포함하지 않는 반만 닫힌 범위 half-closed range에 대해 이터레이션 하면 편할 때가 있는데
+  - 그 때는 until 함수를 사용해라 
+  - `for (x in 0 until size)`라는 루프는 `for (x in 0..size-1)` 과 같지만 더 명확하게 표현 
+
+## 2.4.3 맵에 대한 이터레이션 
+
+```kotlin
+// 문자에 대한 2진 표현 출력 프로그램
+// 2진 표현을 맵에 저장
+fun main(args: Array<String>) {
+   val binaryReps = TreeMap<Char, String>()
+
+    for ( c in 'A'..'F') {
+        val binary = Integer.toBinaryString(c.toInt())
+        binaryReps[c] = binary
+    }
+
+    for ((letter, binary) in binaryReps) {
+        println("$letter = $binary")
+    }
+}
+```
+- .. 를 문자 타입의 값에도 적용 가능
+- 맵에 사용했던 구조 분해 구문을 맵이 아닌 컬랙션에도 활용 가능
+  - 그런 구조 분해 구문 사용시 원소의 현재 인덱스를 유지하면서 컬렉션 이터레이션 가능
+  ```kotlin
+  val list = arrayListOf("10", "11", "1001")
+  for ((index, element) in list.withIndx()) {
+    println("$index: $element")
+  }
+  ```
+  
+## 2.4.4 in으로 컬렉션이나 범위의 원소 검사 
+- in 연산자로 어떤 값이 범위에 속하는지 알 수 있다 
+- !in을 사용하면 어떤 값이 범위에 속하지 않는지 검사 가능 
+```kotlin
+
+fun isLetter(c: Char) = c in 'a'..'z' || c in 'A'..'Z'
+fun isNotDigit(c: Char) = c !in '0'..'9'
+
+//println(isLetter('q'))
+//println(isNotDigit('x'))
+
+```
+```kotlin
+//when에서 in 사용하기
+fun recognize(c:Char) = when(c) {
+    in '0'..'9' -> "it's a digit!"
+    in 'a'..'z', in 'A'..'Z' -> "it's letter"
+    else -> "i dont know"
+}
+```
+- 범위는 문자에만 국한되지 않는다
+- 비교가 가능한 클래스라면(java.lang.Comparable 구현한) 그 클래스의 인스턴스 객체 사용해 범위 만들 수 있다 
+- Comparable을 사용하는 범위의 경우 그 범위 내의 모든 객체를 항상 이터레이션 하지는 못한다 
+  - ex. 'Java'와 'Kotlin" 사이의 모든 문자열 
+  - in 을 사용하면 항상 범위안에 속하는지 결정할 수 있다 
+  ```kotlin
+  println("Kotlin" in "Java".."Scala")
+  ```
+  - 코틀린에 String에 있는 Comparable구현이 두 문자열을 알파벳 순서로 비교해서 여기에 있는 in 검사에도 문자열을 알파벳 순서로 비교한다
+- 컬렉션에도 마찬가지로 in 사용 가능 
+```kotlin
+  println("Kotlin" in setOf("Java","Scala"))
+ ```

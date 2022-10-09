@@ -325,3 +325,19 @@ fun eval(e: Expr): Int =
 
 ```
 - 코틀린에서는 if 가 값을 만들어 내기 때문에 가능한 것 
+```kotlin
+fun eval(e: Expr): Int =
+    when (e) {
+        is Num ->
+            e.value
+        is Sum ->
+            eval(e.right) + eval(e.left)
+        else ->
+            throw IllegalArgumentException("Unknown expression")
+    }
+
+```
+- when 식을 값 동등성 말고도 이것처럼 분기로 쓸 수 있다
+- is Num 하면 스마트 캐스트가 이뤄진다 
+
+## 2.3.7 if와 when의 분기에서 블록 사용

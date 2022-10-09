@@ -313,3 +313,15 @@ fun eval(e: Expr): Int {
   - 원하는 타입으로 명시적으로 타입 캐스팅 하려면 as키워드를 사용한다 
 
 ## 2.3.4 리팩토링: if 를 when으로 변경 
+```kotlin
+fun eval(e: Expr): Int =
+    if (e is Num) {
+        e.value
+    } else if (e is Sum) {
+        eval(e.right) + eval(e.left)
+    } else {
+        throw IllegalArgumentException("Unknown expression")
+    }
+
+```
+- 코틀린에서는 if 가 값을 만들어 내기 때문에 가능한 것 

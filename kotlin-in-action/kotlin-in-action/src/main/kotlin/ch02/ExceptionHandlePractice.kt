@@ -7,15 +7,12 @@ class ExceptionHandlePractice {
 
 }
 
-fun readNumber(reader: BufferedReader) : Int? {
-    try {
-        val line = reader.readLine()
-        return Integer.parseInt(line)
+fun readNumber(reader: BufferedReader) {
+    val number = try {
+        Integer.parseInt(reader.readLine())
     }
     catch (e: NumberFormatException) {
-        return null
+        null
     }
-    finally {
-        reader.close()
-    }
+    println(number)
 }

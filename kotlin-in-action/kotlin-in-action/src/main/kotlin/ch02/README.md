@@ -129,7 +129,7 @@ fun main(args: Array<String>) {
 }
 ```
 
-# 2.2 zmffotmdhk vmfhvjxl 
+# 2.2 클래스와 프로퍼티
 ```java
 
 public class Person {
@@ -176,7 +176,7 @@ println(person.isMarried)
 - 게터를 사용하는 대신 프로퍼티를 직접 사용 
 
 ## 2.2.2 커스텀 접근자 
-- 대부분의 플퍼티에는 그 프로퍼티 값을 저장하기 위한 필드가 있다 
+- 대부분의 프로퍼에는 그 프로퍼티 값을 저장하기 위한 필드가 있다 
 - 이를 프로퍼티를 뒷받침하는 필드 backing field라 부른다 
 - 하지만 원한다면 프로퍼티 값을 그 때 그 때 계산할 수도 있다 커스텀 게터를 작성하면 그런 프로퍼티를 만들 수 있다
 ```kotlin
@@ -259,7 +259,7 @@ enum class Color(
 ```
 
 ## 2.3.3 when과 임의의 객체를 함께 사용 
-- when은 switc보다 훨씬 강력 : 분기 조건에 상수만 오는 switch와 달리 코틀린의 when은 객체가 올 수 있다
+- when은 switch다 훨씬 강력 : 분기 조건에 상수만 오는 switch와 달리 코틀린의 when은 객체가 올 수 있다
 ```kotlin
  fun mix(c1: Color, c2: Color) =
         when(setOf(c1, c2)) {
@@ -525,3 +525,33 @@ fun readNumber(reader: BufferedReader) : Int? {
   - 라이브러리 함수로 가능 기능 구현 가능 8.2.5
 
 ## 2.5.2 try를 식으로 사용 
+```kotlin
+fun readNumber(reader: BufferedReader) {
+    val number = try {
+        Integer.parseInt(reader.readLine())
+    }
+    catch (e: NumberFormatException) {
+        return 
+    }
+    println(number)
+}
+```
+- 코틀린에서 try키워드는 if 나 when과 마찬가지로 식이다
+- 따라서 try 의 값을 변수에 대입할 수 있다 
+- if 와 달리 {} 중괄호로 둘러싸야 한다 
+- 다른 문장과 마찬가지로 try 내부에 여러 문이 있으면 마지막 식의 값이 전체 결과 값이다
+- 이 예제에서는 catch블록 내에서 return문 사용 
+  - 따라서 예외가 발생한 경우 catch 블록 다음의 코드는 실행되지 않는다 (저 식의 결과는 아무 것도 출력되지 않는다)
+  - 만약 계속 진해앟고 싶다면 catch블록도 값을 만들어야 한다 
+
+```kotlin
+fun readNumber(reader: BufferedReader) {
+    val number = try {
+        Integer.parseInt(reader.readLine())
+    }
+    catch (e: NumberFormatException) {
+        null
+    }
+    println(number)
+}
+```

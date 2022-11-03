@@ -75,3 +75,74 @@ open class RichButton : Clickable{ // 이 클래스는 열려 있다. 다른 클
 }
 
 ```
+
+## 4.1.3 가시성 변경자: 기본적으로 공개 
+- 아무 변경자도 없는 경우 모두 public (디폴트가 public)
+- 자바의 패키지 전용 package-private 은 코틀린에는 없다
+- 대신 코틀린에는 internal : 모듈 내부에서만 볼 수 있다 
+  - 모듈 = 한 번에 컴파일 되는 코틀린 파일 
+- 자바에서는 패키지가 같은 클래스를 선언하기만 하면 어떤 프로젝트 외부에 있는 코드라도 패키지 내부에 있는 패키지 전용 선언에 쉽게 접근 가능해 모듈의 캡슐화가 쉽게 깨진다
+- 다른 차이는 코틀린에서는 최상위 선언에 대해 private 허용 (클래스, 함수, 프로퍼티)
+- public : 클래스 멤버) 모든 곳에서 볼 수 있다 / 최상위 선언) 모든 곳에서 볼 수 있다 
+- internal : 클래스 멤버) 같은 모듈에서만 볼 수 있다 / 최상위 선언) 같은 모듈 안에서만 볼 수 있다 
+- protected : 클래스 멤버) 하위 클래스 안에서만 볼 수 있다 / 최상위 선언 적용 불가
+- private : 클래스 멤버) 같은 클래스 안에서만 볼 수 있다 / 최상위 선언) 같은 파일 안에서만 볼 수 있다 
+```kotlin
+TODO() // 위에 최상위 선언 이라는 말이 이해가 안갑니다
+```
+
+```kotlin
+internal class TalkativeButton : Focusable {
+  private fun yell() = println("HEY!")
+  protected fun whisper() = println("Lets' talk!") // 'protected' visibility is effectively 'private' in a final class 
+}
+
+fun TalkativeButton.giveSpeech() {
+  yell() // Cannot access 'yell': it is private in 'TalkativeButton'
+  whisper() // Cannot access 'whisper': it is protected in 'TalkativeButton'
+}
+```
+- public 함수인 giveSpeech() 안에서 그 보다 가시성이 더 낮은 (이 경우 internal) TalkativeButton 을 참조하지 못하게 한다
+- 어떤 클래스의 기반 타입 목록에 들어있는 타입이나 제네릭 클래스의 타입 파라미터에 들어있는 ㅌ아ㅣㅂ의 가시성은 그 클래스 자신의 가시성과 같거나 더 높아야 하고
+- 메서드의 시그니처에 사용된 모든 타입의 가시성은 그 메서드의 가시성과 같거나 높어야 하는 일반적인 규칙에 해당한다
+- giveSpeech 의 가시성을 internal 로 낮추거나 TalkativeButton 을 open으로 해야 함 
+- protected 멤버는 오직 어떤 클래스나 그 클래스를 상속한 클래스 안에서만 보인다. 
+- 클래스를 확장한 함수는 해당 클래스의 private이나 protected 멤버에 접근할 수 없다 
+
+## 4.1.4 내부 클래스와 중첩된 클래스 : 기본적으로 중첩된 클래스
+- 코틀린에서도 클래스 안에 다른 클래스 선언 가능
+- 도우미 클래스 캡슐화 가능 
+- 코드 정의를 코드 사용하는 곳에 가까이 두는 것 가능 
+- 자바와 차이는 코틀린의 중첩 클래스 nested class 는 명시적으로 요청하지 않는 한 바깥 클래스 인스턴스에 대한 접근 권하니 없다 
+- 코틀린 중첩 클래스에 아무 변경자가 붙지 않으면 자바 static 중첩 클래스와 같다 
+- 이를 바깥쪽 클래스에 대한 참조를 포함하게 하고 싶으면 inner 변경자를 붙여야 한₩
+```kotlin
+package ch04
+
+class Outer {
+  inner class Inner {
+    fun getOuterReference(): Outer = this@Outer
+  }
+}
+
+```
+- this@Outer 를 써야 바깥 클래스 참조에 접근 가능
+- 유용성 : 클래스 계층을 만들 되 그 계층에 속한 클래스의 수를 제한하고 싶을 때 
+
+## 4.1.4 봉인된 클래스 : 클래스 계층 정의시 계층 확장 제한 
+- 상위 클래스에 sealed 변경자를 붙이면 그 상위 클래스를 상속한 하위 클래스를 제한할 수 있다 
+- when 쓸 때 else 안써도 되서 when 이 모든 경우를 고려 못할 가능성 (else로 퉁침) 을 방지 할 수 있다
+```kotlin
+package ch04
+
+sealed class Expr {
+    class Num(val value: Int) : Expr()
+    class Sum(val left: Expr, val right: Expr) : Expr()
+}
+
+fun eval(e: Expr): Int =
+    when (e) {
+        is Expr.Num -> e.value
+        is Expr.Sum -> eval(e.right) + eval(e.left)
+    }
+```

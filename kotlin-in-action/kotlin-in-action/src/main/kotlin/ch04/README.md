@@ -218,3 +218,25 @@ class RadioButton: Button() {}
 ```kotlin
 class Secretive private constructor() {}
 ```
+### 4.2.2 부 생성자: 상위 클래스를 다른 방식으로 초기화 
+```kotlin
+open class View{
+    constructor(ctx : Context) {}
+    constructor(ctx : Context, attr : AttributeSet) {}
+}
+```
+- 주 생성자 없이 부 생성자만 있는 경우 
+```kotlin
+class MyButton : View {
+  constructor(ctx : Context) : super(ctx) {}
+  constructor(ctx : Context, attr : AttributeSet) : super(ctx, attr) {}
+}
+```
+- 두 부 생성자가 super() 키워드 통해 자신에 대응하는 상위 클래스 생성자 호출 
+```kotlin
+class MyButton : View {
+  constructor(ctx : Context) : this(ctx, MY_STYLE) {}
+  constructor(ctx : Context, attr : AttributeSet) : super(ctx, attr) {}
+}
+```
+- this() 를 통해서 클래스 자신의 다른 생성자 호출 가능 

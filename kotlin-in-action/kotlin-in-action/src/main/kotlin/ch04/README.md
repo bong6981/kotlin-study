@@ -624,3 +624,153 @@ CaseInsensitiveFileComparator.INSTANCE.compare(file1, file2);
 ```
 - 이 예제에서 INSTANCE 필드 타입은 CaseInsensitiveFileComparator 다 
 
+## 4.4.2 동반 객체 : 팩토리 메서드와 정적 멤버가 들어갈 장소 
+- 코틀린 클래스 안에는 정적인 멤버가 없다. 자바의 static 키워드 지원 안한다 
+- 그대신 패키지 수준의 최상위 함수(자바의 정적 메서드 역할을 거의 대신 할 수 있다)와 객체 선언(자바의 정적 메서드 역할 중 코틀린 최상위 함수가 대신할 수 없는 역할이나 필드를 대신할 수 있다)를 활용한다 
+- 대부분의 경우 최상위 함수를 활용하는 편을 더 권장한다 
+- 하지만 최상위 함수는 private으로 표시된 클래스 비공개 멤버에 접근할 수 없다. 
+- 그래서 클래스의 인스턴스와 관계 없이 호출해야 하지만 클래스 내부 정보에 접근해야 함수가 필요할 때는 클래스에 중첩된 객체 선언의 멤버 함수로 정의해야 한다. 
+- 그런 함수의 대표적인 예로 팩토리 메서드를 들 수 있다 
+- 클래스 안에 정의된 객체 중 하나에 companion이라는 특별한 표시를 붙이면 그 클래스의 동반 객체로 만들 수 있다 
+- 동반 객체의 프로퍼티나 메서드에 접근하려면 그 동반 객체가 정의된 클래스 이름을 사용한다 
+- 이 때 객체의 이름을 따로 지정할 필요가 없다 
+- 그 결과 동반 객체의 멤버를 사용하는 구문은 자바의 정적 메서드 호출이나 정적 필드 사용 구문과 같아진다 
+```kotlin
+class A {
+    companion object {
+        fun bar() {
+            println("Companin object called")
+        }
+    }
+}
+// A.bar() 
+```
+- 동반객체가 private 생성자를 호출하기 좋은 위치다. 
+  - 동반객체는 자신을 둘러싼 클래스의 모든 private 멤버에 접근할 수 있다 
+  - 따라서 동반 객체는 바깥쪽 클래스의 private 생성자도 호출할 수 있다 
+  - 따라서 동반객체는 팩토리 패턴을 구현하기 가장 적합한 위치다 
+- 객체를 생성하는 여러 방법이 있는 클래스가 있다고 했을 때 
+```kotlin
+class User {
+    val nickname: String
+    constructor(email: String) {
+        nickname = email.substringBefore('@')
+    }
+    
+    constructor(facbookAccountId: Int) {
+        nickname = getFaceBookName(facbookAccountId)
+    }
+}
+```
+- 이를 팩토리 메서드를 통해 구현할 수 있다 
+```kotlin
+class User(val nickname: String) {
+    
+    companion object {
+        fun newSubscribingUser(email: String) =
+            User(email.substringBefore('@'))
+        
+        fun newFacebookUser(facbookAccountId: Int) {
+            User(getFaceBookName(facbookAccountId))
+        }
+    }
+}
+
+```
+- 클래스 이름 사용해 클래스에 속한 동반 객체의 메서드 호출 가능 
+```kotlin
+    val subscribingUser = User.newSubscribingUser("bog@gmail.com")
+    val facebookUser = User.newFacebookUser(4)
+```
+- 팩토리 메서드는 유용
+  - 목적에 따라 팩토리 메서드 이름을 정할 수 있다 
+  - 팩토리 메서드가 선언된 클래스의 하위 클래스 객체를 반환할 수도 있다 
+    - 예를 들어 subscribingUser와 facebookUser 클래스가 따로 존재한다면 그 때 그 때 필요에 따라 적당한 클래스의 객체를 반환할 수 있다
+    - 또한 팩토리 메서드는 생성할 필요가 없는 객체를 생성하지 않을 수도 있다 
+      - 예를 들어 이메일 주소별로 유일한 User 인스턴스를 만드는 경우 팩토리 메서드가 이미 존재하는 인스턴스에 해당하는 이메일 주소를 전달받으면 새 인스턴스를 만들지 않고 캐시에 있는 기존 인스턴스를 반환할 수 있다. 
+- 하지만 클래스를 확장해야만 하는 경우에는 동반 객체 멤버를 하위 클래스에서 오버라이드 할 수 없으므로 여러 생성자를 사용하는 편이 더 나은 해법이다 
+
+## 4.4.3 동반 객체를 일반 객체처럼 사용 
+- 동반 객체는 클래스 안에 정의된 일반 객체다. 
+- 동반 객체에 이름을 붙이거나, 동반 객체가 인터페이스를 상소갛거나, 동반 객체 안에 확장함수와 프로퍼티를 정의할 수 있다.
+- 회사 급여 명부를 제공하는 웹 서비스가 있다고 하자 
+  - 서비스에서 사용하기 위해 객체를 JSON으로 직렬화/역직렬화 해야 한다 
+- 직렬화 로직을 동반 객체 안에 넣을 수 있다 
+```kotlin
+class Person(val name: String) {
+    companion object Loader { // 동반객체에 이름을 붙인다 
+        fun fromJSON(jsonText: String) : Person = ...
+    }
+}
+```
+```kotlin
+>>> person = Person.Loader.fromJSON("{name: 'Dirty'}")
+>>> person.name // Dirty
+>>> person2 = Person.fromJSON("{name: 'Brent'}")
+>>> person2.name // Brent
+```
+- 두 방법 모두 fromJSON 호출 가능 
+- 특별히 이름 지정하지 않으면 동반 객체 이름은 자동으로 Companion 이 된다. 
+
+### 동반 객체에서 인터페이스 구현 
+- 동반 객체도 인터페이스를 구현할 수 있다 
+- 인터페이스를 구현하는 동반 객체를 참조할 때 객체를 둘러싼 클래스의 이름을 바로 사용할 수 있다
+- 시스템에 Person 을 포함한 다양한 타입의 객체가 있다고 가정하자
+- 이 시스템에서는 모든 객체를 역직렬화를 통해 만들어야 하기 때문에 
+- 모든 타입의 객체를 생성하는 일반적인 방법이 필요하다 
+- 이를 위해 JSON을 역질렬화 하는 JSONFactory 인터페이스가 존재한다
+- Person은 다음와 같이 JSONFactory 구현을  제공할 수 있다 
+```kotlin
+interface JSONFactory<T> {
+    fun fromJSON(jsonText: String) : T
+}
+class Person(val name: String) {
+    companion object : JSONFactory<Person> {
+        override fun fromJSON(jsonText: String) : Person = ... // 동반객체가 인터페이스 구현
+    }
+}
+```
+- 이제 JSON으로부터 각 원소를 다시 만들어내는 추상 팩토리가 있다면 Person 객체를 그 팩토리에게 넘길 수 있다 
+```kotlin
+fun loadFromJSON(factory: JsonFactory<T>): T {
+    ...
+}
+loadFromJSON(Person) // 동반객체의 인스턴스를 함수에 넘긴다
+```
+```kotlin
+// TODO: 이게 무슨말일까?  Person이 어떻게 JSONFactory<Person> 로 들어가지? 
+// 그럼 동반객체가 여럿 일 수도 있나? 구현 타입이? 
+```
+- 여기서 동반객체가 구현한 JsonFactory 의 인스턴스를 넘길 때 Person 클래스의 이름을 사용했다는 점에 유의해라 
+ 
+### 동반 객체 확장 
+- 3.3 절에서 확장 함수를 사용하면 코드 기반의 다른 곳에서 정의된 클래스의 인스턴스에 대해 새로운 메서드를 정의할 수 있음을 보였다. 
+- 그렇다면 자바의 정적 메서드나 코틀린의 동반 객체 메서드처럼 기존 클래스에 대해 호출할 수 있는 새로운 함수를 정의하고 싶다면?
+- 클래스에 동반객체가 있으면 그 객체 안에 함수를 정의함으로써 클래스에 대해 호출할 수 있는 확장 함수를 만들 수 있다 
+- C라는 클래스 안에 동반 객체가 있고 그 동반객체 (C.Companion) 안에 func를 정의하면 외부에서는 func()를 C.func()로 호출할 수 있다 
+- 
+- 예를 들어 Person 은 비즈니스 모듈
+- 그 비즈니스 모듈이 특정 데이터 타입에 의존하길 원하지 않는다 
+- 역직렬화 함수를 비즈니스 모듈이 아니라 클라이언트/서버 통신을 담당하는 모듈 안에 포함시키고 싶다 
+- 확장함수를 사용하면 이렇게 구조를 잡을 수 있다 
+- 다음 예제에서는 이름 없이 정의된 동반 객체를 가리키기 위해 동반 객체의 기본 이름인 Companion사용 
+```kotlin
+//비즈니스 로직 모듈 
+class Person(val firstName: String, val lastName: String) {
+    companion object {
+        // 비어있는 동반 객체 선언
+    }
+}
+
+// 클라이언트/서버 통신 모듈 
+fun Person.Companion.fromJSON(json: String): Person {
+    // 확장 함수 선언 
+}
+
+val p = Person.fromJSON(json)
+```
+- 마치 동반 객체 안에서 fromJSON 를 정의한 것처럼 fromJSON 을 호출할 수 있다 
+- 하지만 실제로 fromJSON 는 클래스 밖에서 정의한 확장 함수 
+- 다른 보통 확장함수 처럼 fromJSON 도 클래스 멤버 함수처럼 보이지만, 실제로는 멤버 함수가 아니다. 
+- 여기서 동반 객체에 대한 확장함수를 작성할 수 있으려면 원래 클래스에 동반객체를 꼭 선언해야 함 
+- 설령 빈 객체라도 동반 객체가 꼭 있어야 한다 

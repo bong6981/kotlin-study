@@ -27,13 +27,17 @@ fun main(args: Array<String>) {
 //    println(lee)
 
     // 4.4.1 ~
-    println(CaseInsensitiveFileComparator.compare(File("/User"), File("/user"))) // 0
+//    println(CaseInsensitiveFileComparator.compare(File("/User"), File("/user"))) // 0
+//
+//    val files = listOf(File("/z"), File("/a"))
+//    println(files.sortedWith(CaseInsensitiveFileComparator)) // [/a, /z]
+//
+//    val persons = listOf(Person("Bob"), Person("Alice"))
+//    println(persons.sortedWith(Person.NameComparator)) // [Person(name=Alice), Person(name=Bob)]
 
-    val files = listOf(File("/z"), File("/a"))
-    println(files.sortedWith(CaseInsensitiveFileComparator)) // [/a, /z]
-
-    val persons = listOf(Person("Bob"), Person("Alice"))
-    println(persons.sortedWith(Person.NameComparator)) // [Person(name=Alice), Person(name=Bob)]
+    // 4.4.2 ~
+    val subscribingUser = User.newSubscribingUser("bog@gmail.com")
+    val facebookUser = User.newFacebookUser(4)
 }
 
 

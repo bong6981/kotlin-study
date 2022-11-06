@@ -240,3 +240,60 @@ class MyButton : View {
 }
 ```
 - this() 를 통해서 클래스 자신의 다른 생성자 호출 가능 
+
+## 4.2.3 인터페이스에 선언된 프로퍼티 구현 
+- 추상 프로퍼티 선언이 들어 있는 인터페이스 선언 예
+
+```kotlin
+interface User {
+  val nickname: String
+}
+```
+- 이는 User 라는 인터페이스를 구현하는 클래스가 nickname의 값을 얻을 수 있는 방법을 제공해야 한다는 뜻이다 
+- privateUser : 별명을 저장하게 하자
+```kotlin
+class PrivateUser(override val nickName: String) : User 
+
+println(PrivateUser("test@kotlinlang.org").nickName) // "test@kotlinlang.org"
+```
+- SubscribingUser는 이메일을 함께 저장 
+```kotlin
+class SubscribingUser(val email: String) : User {
+  override val nickName: String
+    get() = email.substringBefore('@') // custom getter로 nickname 프로퍼티 설정
+  // 뒷받침하는 필드에 값을 저장하지 않고 매번 이메일 주소에서 별명을 계산해 반환
+  
+}
+
+println(SubscribingUser("test@kotlinlang.org").nickName) // test
+```
+- FacebookUser에서는 초기화 식으로 nickname 값을 초기화한다 
+```kotlin
+class FacebookUser(): User {
+  override val nickName = getFacebookName(accountId)
+  /** getFacebookName 는 외부에서 가져오는 것이기 때문에 비용이 많이 들 수 있어
+   * 위에 SubscribingUser 처럼 매번 가져오는 식으로 하지 않고 
+   * 초기화 하는 단계에 한 번만 가져오도록 했다. 
+   */
+}
+```
+- 
+- 인터페이스에는 추상 프로퍼티 뿐 아니라 게터와 세터가 있는 프로퍼티를 선언할 수 있다 
+- 물론 그런 게터와 세터는 뒷받침하는 필드를 참조할 수 없다. 
+  - ( 뒷받침하는 필드가 있다면 인터페이스에 상태를 추가하는 셈인데 인터페이스는 상태를 저장할 수 없다)
+```kotlin
+interface User {
+    val email: String
+    val nickname: String
+      get() = email.substringBefore('@')
+}
+```
+- 이 인터페이스에는 추상 프로퍼티가 2개.
+  - 하위 클래스는 추상 프로퍼티인 email을 반드시 오버라이드해서 구현해야 한다 
+  - 반면 nickname은 오버라이드하지 않고 상속할 수 있다 
+- 클래스에 구현된 프로퍼티는 뒷받침 필드를 가질 수 있다 
+
+
+
+
+

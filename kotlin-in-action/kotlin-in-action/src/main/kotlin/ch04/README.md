@@ -324,6 +324,23 @@ class User (val name: String){
 ```
 - 이제 접근자의 가시성을 어떻게 바꾸는지 알아보자 
 
-
+## 4.2.4 접근자의 가시성 변경 
+- 접근자의 가시성은 기본적으로 프로퍼티의 가시성과 같다 
+- 하지만 원한다면 get, set 앞에 가시성 변경자를 추가해서 접근자의 가시성을 변경할 수 있다 
+```kotlin
+class LengthCounter {
+    var counter: Int = 0
+        private set // 이 클래스 밖에 이 프로퍼티의 값을 바꿀 수 없다 
+    fun addWord(word: String) {
+        counter += word.length
+    }
+}
+```
+- counter 프로퍼티는 pulbic, setter는 private 
+```kotlin
+    val lengthCounter = LengthCounter()
+    lengthCounter.addWord("Hi!") 
+    println(lengthCounter.counter) // 3
+```
 
 

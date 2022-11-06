@@ -448,3 +448,39 @@ class Client(val name: String, val postalCode: Int) {
  // true
 ```
 - 코틀린은 다행히 이 모든 메서드를 자동으로 생성 가능 
+
+## 4.3.2 데이터 클래스 : 모든 클래스가 정의해야 하는 메서드 자동 생성
+- data 변경자가 붙은 클래스를 데이터 클래스 라고 부른다 
+```kotlin
+data class Client(val name: String, val postalCode: Int)
+```
+```kotlin
+ val client1 = Client("오현석", 4122)
+    println(client1) //Client(name=오현석, postalCode=4122)
+
+val client2 = Client("오현석", 4122)
+    println(client1 == client2) // true
+
+    val processed = hashSetOf(Client("오현석", 4122))
+    println(processed.contains(Client("오현석", 4122))) // true
+```
+- 데이터 클래스는 equals, hashcode, toString 제공 
+- 추가로 유용한 메서드 몇가지 더 7.4 절에서 더 얘기 할게 
+
+### 데이터 클래스와 불변성 : copy() 메서드 
+- 하나만 여기서 얘기하자면 copy() 메서드 
+- 데이트 클래스의 프로퍼티가 꼭 val 일 필요는 없다. 
+- 하지만 데이터 클래스의 모든 프로퍼티를 읽기 전용으로 만들어서 데이터 클래스를 불변 immutable로 만들기를 권장 
+- 코틀린에서는 객체를 복사하면서 일부 프로퍼티를 변경하게 해주는 copy() 메서드 제공
+- Client의 copy() 메서드를 구현한다면 아래와 같을 것 
+```kotlin
+fun copy(name: String = this.name,
+            postalCode: Int = this.int) {
+    Client(name, postalCode)
+}       
+```
+```kotlin
+    val lee = Client("이계명", 4223)
+    lee.copy(postalCode = 4000)
+    println(lee) // Client(name=이계명, postalCode=4223)
+```

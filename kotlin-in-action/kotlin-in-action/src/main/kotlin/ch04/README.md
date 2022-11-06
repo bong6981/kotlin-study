@@ -541,3 +541,86 @@ class CountingSet<T>(
 }
 ```
 - 이 때 CountingSet 에  MutableCollection<T> 의 구현 방식에 대한 의존관계가 생기지 않는다는 점이 중요 
+
+# 4.4 object 키워드 : 클래스 선언과 인스턴스 생성 
+- 코틀린에서는 object 키워드를 다양한 상황에서 사용, 근데 모든 경우 클래스를 정의하면서 동시에 인스턴스(객체)를 생성한다는 공통점
+- object를 사용하는 여러 상황들 
+  - 객체 선언 object declaration 은 싱글턴을 정의하는 방법 중 하나 
+  - 동반 객체 companion object 는 인스턴스 메서드는 아니지만, 어떤 클래스와 관련 있는 메서드와 팩토리 메서드를 담을 때 쓰인다 
+    - 동반 객체 메서드에 접근할 때는 동반 객체가 포함된 클래스의 이름을 사용할 수 있다 
+  - 객체 식은 자바의 무명 내부 클래스 anonymous inner class 대신 쓰인다
+
+## 4.4.1 객체 선언 : 싱글턴을 쉽게 만들기 
+- 자바에서는 싱글턴을 만들 때 보통 클래스의 생성자를 private으로 제한하고 정적인 필드에 그 클래스의 유일한 객체를 저장하는 싱글턴 패턴 singleton pattern 을 통해 이를 구현한다 
+- 코틀린은 객체 선언 기능을 통해 싱글턴을 언어에서 기본 지원
+- 객체 선언은 클래스 선언와 그 클래스에 속한 단일 인스턴스의 선언을 합친 것 
+```kotlin
+object Payroll {
+    val allEmployees = arrayListOf<Person>()
+    
+    fun calculateSalary() {
+        for ( person in allEmployees) {
+            ...
+        }
+    }
+}
+```
+- 객체 선언은 object 키워드로 시작 
+  - 클래스를 정의하고 그 클래스의 인스턴스를 만들어서 변수에 저장하는 작업을 단 한 문장으로 처리
+- 클래스와 마찬가지로 객체 선언 안에도 프로퍼티, 메소드, 초기화 블록 등이 들어갈 수 있다 
+- 하지만 생성자는 (주생성자, 부 생성자 모두) 객체 선언에 쓸 수 없다 
+- 싱글턴 객체는 객체 선언문이 있는 위치에서 생성자 호출 없이 즉시 만들어 진다 
+- 따라서 객체 선언에는 생성자 정의가 필요 없다 
+- 
+- 변수와 마찬가지로 객체 선언에 사용한 이름 뒤에 마침표 (.) 을 붙이면 객체에 속한 메서드나 프로퍼티에 접근 가능 
+- 객체 선언도 클래스나 인터페이스를 상속할 수 있다 
+  - 프레임워크를 사용하기 위해 특정 인터페이스를 구현해야 하는데 그 구현 내부에 다른 상태가 필요하지 않는 경우에 이런 기능이 유용
+    - 예를 들어 java.util.Comparator 인터페이스 
+    - Comparator 구현은 두 객체를 인자로 받아 그 중 어느 객체가 더 큰지 알려주는 정수를 반환 
+    - Comparator 안에는 데이터를 저장할 필요 없다 
+    - 따라서 어떤 클래스에 속한 객체를 비교할 때 사용하는 Comparator 는 보통 클래스마다 하나만 있으면 된다 
+    - 따라서 Comparator 인스턴스를 만드는 방법으로 객체 선언이 가장 좋은 방법 
+    - 두 파일 경로를 대소문자 관계 없이 비교해주는 Comparator 구현 
+    ```kotlin
+    object CaseInsensitiveFileComparator : Comparator<File> {
+        override fun compare(file1: File, file2: File): Int {
+             return file1.path.compareTo(
+                                    file2.path,
+                                    ignoreCase = true
+             )
+        }
+    }
+    ```
+    ```kotlin
+       println(CaseInsensitiveFileComparator.compare(File("/User"), File("/user"))) // 0
+    ```
+    - 일반 객체 (클래스 인스턴스)를 사용할 수 있는 곳에서는 항상 싱글턴 객체를 사용할 수 있다 
+      - 예를 들어 이 객체를 Comparator를 인자로 받는 함수에게 인자로 넘길 수 있다 
+        ```kotlin
+         val files = listOf(File("/z"), File("/a"))
+         println(files.sortedWith(CaseInsensitiveFileComparator)) // [/a, /z]
+        ```
+- 클래스 안에서 객체 선언 가능 
+  - 그런 객체도 단 하나뿐 (바깥 클래스의 인스턴스 마다 생기는 것이 아님)
+```kotlin
+data class Person(val name: String) {
+    object NameComparator : Comparator<Person> {
+        override fun compare(p1: Person, p2: Person): Int =
+           p1.name compareTo p2.name
+    }
+}
+```
+```kotlin
+
+    val persons = listOf(Person("Bob"), Person("Alice"))
+    println(persons.sortedWith(Person.NameComparator)) // [Person(name=Alice), Person(name=Bob)]
+```
+- 코틀린 객체 선언은 유일한 인스턴스에 대한 정적인 필드가 있는 자바 클래스로 컴파일된다 
+- 이 때 인스턴스 이름은 항상 INSTANCE다 
+- 싱글턴 패턴을 자바에서 구현해도 비슷한 필드가 필요 
+- 자바 코드에서 코틀린 싱글턴 객체를 사용하려면 정적인 INSTANCE 필드를 통하면 된다 
+```java
+CaseInsensitiveFileComparator.INSTANCE.compare(file1, file2);
+```
+- 이 예제에서 INSTANCE 필드 타입은 CaseInsensitiveFileComparator 다 
+

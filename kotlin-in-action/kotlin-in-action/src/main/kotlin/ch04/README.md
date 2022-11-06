@@ -774,3 +774,72 @@ val p = Person.fromJSON(json)
 - 다른 보통 확장함수 처럼 fromJSON 도 클래스 멤버 함수처럼 보이지만, 실제로는 멤버 함수가 아니다. 
 - 여기서 동반 객체에 대한 확장함수를 작성할 수 있으려면 원래 클래스에 동반객체를 꼭 선언해야 함 
 - 설령 빈 객체라도 동반 객체가 꼭 있어야 한다 
+
+## 4.4.4 객체 식: 무명 내부 클래스를 다른 방식으로 작성 
+- object 키워드를 싱글턴과 같은 객체를 정으하고 그 객체에 이름을 붙일 때만 사용하는 것은 아니다 
+- 무명 객체 anonymous object 를 정의할 때도 object 키워드를 쓴다 
+- 무명 객체는 자바의 무명 내부 클래스를 대신 
+- 무명 객체로 이벤트 리스터 구현하기
+
+```kotlin
+
+import java.awt.event.MouseAdapter
+import java.awt.event.MouseEvent
+
+window.addMouseListener(
+  object : MouseAdapter() {
+      override fun mouseClicked(e: MouseEvent?){
+        // ... 
+      }
+    
+      override fun mouseEntered(e: MouseEvent?){
+          // ...
+      }
+  }
+)
+```
+- 사용한 구문은 객체 선언에서와 같다. 
+- 유일한 차이는 객체 이름이 빠졌다는 점 
+- 객체 식은 클래스를 정의하고 그 클래스에 속한 인스턴스를 생성하지만 
+- 클래스나 인스턴스에 이름을 붙이지는 않는다 
+- 이런 경우 보통 함수를 호출하면서 인자로 무명 객체를 넘기기 때문에 클래스와 인스턴스 모두 이름이 필요 없다
+- 하지만 객체에 이름을 붙여야 한다면 변수에 무명 객체를 대입하면 된다. 
+```kotlin
+val listener = object : MouseAdapter() {
+      override fun mouseClicked(e: MouseEvent?){
+        // ... 
+      }
+    
+      override fun mouseEntered(e: MouseEvent?){
+          // ...
+      }
+  }
+```
+- 한 인터페이스만 구현하거나 한 클래스만 확장할 수 있는 자바의 무명 내부 클래스와는 달리 
+- 코틀린의 무명 클래스는 여러 인터페이스를 구현하거나 클래스를 확장하면서 인터페이스를 구현할 수 있다 
+- 객체 선언과 달리 무명 객체는 싱글턴이 아니다. 객체 식이 쓰일 때마다 새로운 인스턴스가 생성 된다. 
+- 무명 객체 안에서 로컬 변수 사용하기 
+  - 자바의 무명 클래스와 같이 객체 식 안의 코드는 그 식이 포함된 함수의 변수에 접근할 수 있다 
+  - 하지만 자바와 달리 final이 아닌 변수도 객체 식 안에서 사용할 수 있다 
+  - 따라서 객체 식 안에서 그 값을 변경할 수 있다
+  ```kotlin
+
+   import java.awt.event.MouseAdapter
+   fun countClicks(window: Window) {
+    var clickCount = 0 // 로컬 변수 정의
+    
+    window.addMouseLisener(object: MouseAdapter() {
+      override fun mouseClicked(e: MouseEvent) {
+        clickCount++ // 로컬 변수 값 변경
+      }
+    })
+      
+  }
+  ```
+- 객체 식은 무명 객체 안에서 여러 메서드를 오버라이드 할 경우에 훨씬 더 유용
+- 메서드가 하나뿐인 인터페이스를 구현해야 한다면 코틀린의 SAM 지원을 활용하는 편이 더 낫다
+- SAM 변환을 사용하려면 무명 객체 대신 함수 리터럴(람다)를 활용해야 함
+- 자세한 건 5장 
+```kotlin
+// TODO: 여기도 이해 안가. 무명 객체 는 한 메서드를 오버라이드 하기 위한 것 아닌가? 
+```

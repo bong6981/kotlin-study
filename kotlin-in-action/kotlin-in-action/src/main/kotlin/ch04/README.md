@@ -484,3 +484,60 @@ fun copy(name: String = this.name,
     lee.copy(postalCode = 4000)
     println(lee) // Client(name=이계명, postalCode=4223)
 ```
+
+## 4.3.3 클래스 위임 : by 키워드 사용 
+- 대규모 객체지향 시스템을 취약하게 만드는 문제는 보통 구현 상속에 의해 발생한다. implementation inheritance 
+- 하위 클래스가 상위 클래스의 메서드 중 일부를 오버라이드하면 하위 클래스는 상위 클래스 세부 구현 사항에 의존하게 된다 
+- 시스템이 변하면서 상위 클래스이 구현이 바뀌거나 상위 클래스에 새로운 메서드가 추가된다. 
+  - 그 과정에서 하위 클래스가 상위 클래스에 대해 가졌던 가정이 깨지면서 코드가 정상적으로 작동할 수 없을 수 있다 
+- 코틀린을 설계하면서 기본으로 final 로 모든 클래스를 취급하면서 이 문제를 해결하고자 했다 
+  - 상속을 염두에 두고 open 변경자로 열어둔 클래스만 확장할 수 있다 
+  - 열린 상위 클래스의 소스코드를 변경할 때는 open 키워드를 보고 해당 클래스를 다른 클래스가 상속했다고 예상할 수 있다 변경시 하위 클래스를 깨지 않게 조심할 수 있다 
+- 하지만 종종 상속을 허용하지 않는 클래스에 대해 새로운 동작을 추가해야 할 때가 있다. 이 때 사용하는 패턴이 데코레이터 패턴
+  - 이 패턴의 핵심은 상속을 허용하지 않는 클래스를 대신 사용할 수 있는 새로운 클래스(데코레이터)를 만들되 
+  - 기존 클래스와 같은 인터페이스를 데코레이터가 제공하게 하고 
+  - 기존 클래스를 데코레이터 내부에 필드로 유지 
+  - 이 때 새로 정의해야 하는 기능은 데이코레이의 메서드에 새로 정의 
+    - 물론 이 때 기존 클래스의 메서드나 필드 활용 가능 
+  - 기존 기능이 그대로 필요한 부분은 데코레이터 메서드가 기존 클래스의 메서드에게 요청을 전달forward 
+- 이런 접근법의 단점은 준비 코드가 상당히 많이 필요하다 
+```kotlin
+package ch04
+
+class DelegatingCollection<T> : Collection<T> {
+    private val innerList = arrayListOf<T>()
+    
+    override val size: Int
+        get() = innerList.size
+    override fun isEmpty(): Boolean = innerList.isEmpty()
+    override fun iterator(): Iterator<T> = innerList.iterator()
+    override fun containsAll(elements: Collection<T>): Boolean = innerList.containsAll(elements)
+    override fun contains(element: T): Boolean = innerList.contains(element)
+}
+```
+- 복잡한데, by 로 간편하게 
+```kotlin
+class DelegatingCollection<T>(
+    innerList: Collection<T> = ArrayList<T>()
+) : Collection<T> by innerList {}
+```
+- 이 기법을 이용해 원소를 추가하려고 시도한 횟수를 기록하는 컬렉션을 구현할 수 있다 
+```kotlin
+
+class CountingSet<T>(
+    val innerSet: MutableCollection<T> = HashSet<T>()
+) : MutableCollection<T> by innerSet {
+    var objectsAdded = 0
+
+    override fun add(element: T): Boolean {
+        objectsAdded++
+        return innerSet.add(element)
+    }
+
+    override fun addAll(c: Collection<T>): Boolean {
+        objectsAdded += c.size
+        return innerSet.addAll(c)
+    }
+}
+```
+- 이 때 CountingSet 에  MutableCollection<T> 의 구현 방식에 대한 의존관계가 생기지 않는다는 점이 중요 

@@ -343,4 +343,108 @@ class LengthCounter {
     println(lengthCounter.counter) // 3
 ```
 
+# 4.3 컴파일러가 생성한 메서드 : 데이터 클래스와 클래스 위임 
+- 자바 플랫폼에서는 클래스가 equals, hashCode, toString 등의 메서드를 구현해햐 한다 
+- 그리고 이런 메서드들은 보통 비슷한 방식으로 기계적으로 구현할 수 있다 
+- IDE 도움을 받으면 쉽게 생성 
+- 하지만 자동으로 equals, hashCode, toString 등의 메서드 생성한다고 해도 코드가 번잡스럽다
+- 코틀린 컴파일러는 이 기계적으로 생성하는 작업을 보이지 않는 곳에서 해줘 코드를 깔끔하게 구현할 수 있다
+- 그런 원칙이 잘 드러났던 예 : 클래스 생성자나 프로퍼티 접근자를 컴파일러가 자동으로 만들어 줌 
 
+## 4.3.1 모든 클래스가 정의해야 하는 메서드 
+
+- 코틀린도 equals, hashCode, toString 등을 오버라이드 할 수 있다 
+- 각각이 어떤 메서드이고 어떻게 그런 메서드를 정의해야 하는지 살펴보자 
+- 코틀린은 이런 메서드 구현을 자동으로 생성 
+
+```kotlin
+package ch04
+class Client(val name: String, val postalCode: Int)
+
+```
+```kotlin
+val client = Client("오현석", 4122)
+println(client) // ch04.Client@4a574795
+```
+
+### 문자열 표현 : toString() 
+```kotlin
+class Client(val name: String, val postalCode: Int) {
+    override fun toString(): String = "Client (name=$name, postalCode=$postalCode)"
+}
+```
+```kotlin
+// Client (name=오현석, postalCode=4122)
+```
+
+### 객체의 동등성: equals()
+
+```kotlin
+    val client1 = Client("오현석", 4122)
+
+    val client2 = Client("오현석", 4122)
+    println(client1 == client2) // false
+```
+
+- 번외 : 동등성 연산에 == 사용 
+  - 자바에서는 == 를 원시타입과 참조타입을 비교할 때 사용한다
+    - 원시타입의 경우 == 는 피연산자의 값이 같은지 비교한다 (동등성 equality)
+    - 참조타입의 경우 == 는 두 피연산자의 주소가 같은지 비교한다. (참조 비교(reference comparison))
+  - 따라서 자바에서는 두 객체의 동등성을 알려면 equals 사용해야 한다
+  - 코틀린에서는 == 연산자가 두 객체를 비교하는 방법 
+    - == 는 내부적으로 equals를 호출 
+    - 참조 비교를 위해서는 === 연산자를 사용할 수 있다 
+    - === 는 자바에서 객체의 참조를 비교할 때 사용하는 == 와 같다 
+```kotlin
+package ch04
+
+class Client(val name: String, val postalCode: Int) {
+    override fun toString(): String = "Client (name=$name, postalCode=$postalCode)"
+    override fun equals(other: Any?): Boolean { /***
+                                                Any는 java.lang.Object에 대응하는 클래스. 
+                                                코틀린의 모든 클래스의 최상위 클래스 ***/
+        if (other == null || other !is Client) 
+            return false
+        return name == other.name &&
+                postalCode == other.postalCode 
+    }
+}
+
+```
+- 코틀린의 is 연산자는 자바의 instanceOf와 같다. 
+- is 는 어떤 값의 타입을 검사한다 
+- 코틀린에서는 override 변경자가 필수라 `override fun equals(other: Any?):`를 `override fun equals(other: Client?):`로 작성할 수 없다
+- 면접에서 Client가 제대로 작동하지 않는 경우 물으면?
+  - hashCode 정의를 빠트려서 
+  - 이 경우에는 hashCode 가 없다는 점이 원인이다. 
+
+### 해시 컨테이너 : hashCode() 
+- 자바에서는 equals를 오버라이드 할 때는 반드시 hashCode 도 오버라이드 해야 한다 
+```kotlin
+  val processed = hashSetOf(Client("오현석", 4122))
+    println(processed.contains(Client("오현석", 4122))) // false 
+```
+- 이는 Client 클래스가 hashCode 를 정의하지 않아서 
+- JVM언어에서는 hashCode가 지켜야 하는 " equals() 가 true를 반환하는 두 객체는 반드시 같은 hashCode를 반환해야 한다"는 제약 
+```kotlin
+package ch04
+
+class Client(val name: String, val postalCode: Int) {
+    override fun toString(): String = "Client (name=$name, postalCode=$postalCode)"
+    override fun equals(other: Any?): Boolean { /***
+                                                Any는 java.lang.Object에 대응하는 클래스.
+                                                코틀린의 모든 클래스의 최상위 클래스 ***/
+        if (other == null || other !is Client)
+            return false
+        return name == other.name &&
+                postalCode == other.postalCode
+    }
+
+    override fun hashCode(): Int = name.hashCode() * 31 + postalCode
+}
+
+```
+```kotlin
+ // true
+```
+- 코틀린은 다행히 이 모든 메서드를 자동으로 생성 가능 

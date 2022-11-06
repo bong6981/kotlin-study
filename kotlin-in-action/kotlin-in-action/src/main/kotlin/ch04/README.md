@@ -293,6 +293,36 @@ interface User {
   - 반면 nickname은 오버라이드하지 않고 상속할 수 있다 
 - 클래스에 구현된 프로퍼티는 뒷받침 필드를 가질 수 있다 
 
+## 4.2.4 게터와 세터에서 뒷받침하는 필드에 접근 
+
+- 이제 어떤 값을 저장은 하되, 그 값을 변경하거나 읽을 때마다 정해진 로직을 실행하도록 만들어보자 
+- 값을 저장하는 동시에 로직을 실행하기 위해서는 접근자 안에서 프로퍼티를 뒷받침하는 필드에 접근할 수 있어야 한다 
+- 프로퍼티에 저장된 값의 변경 이력의 로그를 남기려는 경우 
+  - 변경 가능한 프로퍼티를 정의하되 세터에서 프로퍼티 값을 바꿀 때마다 약간의 코드를 추가로 실행해야 한다 
+
+```kotlin
+class User (val name: String){
+  var address: String = "unspecified"
+    set(value: String) {
+      println("""
+                Address was changed for $name:
+                "$field" -> "$value"
+            """.trimIndent())
+      field = value
+    }
+}
+/**
+ * Address was changed for Alice:
+ * "unspecified" -> "Elsenhemierstrases 47, 80687 Muenchen"
+ */
+```
+- 컴파일러는 디폴트 접근자 구현을 사용한건 직접 게터나 세터를 사용한건 상관 없이 게터나 세터에서 field를 사용하는 프로퍼티에 대해 뒷받침하는 필드를 생성해준다 
+- 다만 field 를 사용하지 않는 커스텀 접근자 구현을 정의한다면 뒷받침하는 필드는 존재하지 않는다 
+  - 프러퍼티가 val인 경우에는 게터에 field가 없으면 되지만, var인 경우에는 게터나 세터 모두에 field가 없어야 한다 
+```kotlin
+// TODO: 위에도 무슨 말인지 모르겠다  
+```
+- 이제 접근자의 가시성을 어떻게 바꾸는지 알아보자 
 
 
 

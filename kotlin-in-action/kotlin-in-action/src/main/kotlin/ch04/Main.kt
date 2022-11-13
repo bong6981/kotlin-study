@@ -36,8 +36,14 @@ fun main(args: Array<String>) {
 //    println(persons.sortedWith(Person.NameComparator)) // [Person(name=Alice), Person(name=Bob)]
 
     // 4.4.2 ~
-    val subscribingUser = User.newSubscribingUser("bog@gmail.com")
-    val facebookUser = User.newFacebookUser(4)
+//    val subscribingUser = User.newSubscribingUser("bog@gmail.com")
+//    val facebookUser = User.newFacebookUser(4)
+
+    // 4.4.3 ~
+    loadFromJson(Person)
+    val something : JSONFactory<Person> = Person
+    val something1 : JSONFactory<Person> = Person.Companion
+
 }
 
 

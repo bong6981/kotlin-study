@@ -233,7 +233,7 @@ fun View.showOff() = println("im a view")
 fun Button.showOff() = println("im a button")
 
 //      val view : View = Button()
-//      view.showOff() // im a view
+//      view.showOff() // im a view // 확장 함수는 정적으로 결정된다 
 ```
 - 확장함수를 첫번째 인자가 수신객체인 정적 자바 메서드로 컴파일 한다는 것을 기억 
 ```java
@@ -246,6 +246,21 @@ ExtensionKt.showOff(view);
 - 여러분이 코드 소유권을 가진 클래스에 대한 확장함수를 정의해서 사용하는 외부 클라이언트 프로젝트가 있다고 했을 때 
 - 확장함수와 이름과 시그니처가 같은 함수를 클래스 내부에 추가하면 클라이언트는 프로젝트를 재컴파일 한 후 부터는 확장함수 말고 새로 추가된 함수를 사용하게 된다 
 ## 3.3.5 확장 프로퍼티
+- 확장 프로퍼티를 사용하면 기존 클래스 객체에 대한 프로퍼티 형식의 구문으로 사용할 수 있는 API를 추가할 수 있다
+- 프로퍼티라는 이름으로 불리기는 하지만 상태를 저장할 적절한 방법이 없기 때문에 (긴존 클래스으의 인스턴스 객체에 필드를 추가할 방법은 없다)
+- 실제로 확장 프로퍼티는 아무런 상태를 가질 수 없다 
+- 하지만 프로퍼티 문법으로 더 짧게 코드를 작성할 수 있어서 편한 경우가 있다 
+- 리스트 3.7 확장 프로퍼티 선언하기  
+```kotlin
+val String.lastchar: Char
+get() = get(length-1)
+
+```
+- 확장 함수와 마찬가지로 확장 프로퍼티도 일반적인 프로퍼티와 같은데 
+- 단지 수신 객체 클래스가 추가됐을 뿐이다
+- String.lastchar 에서는 뒷받침 하는 필드가 없어서 기본 게터 구현을 제공할 수 없으므로 최소한 게터는 꼭 정의를 해야 한다 (p73 참고)
+- 마찬가지로 초기화 코드에서 계산한 값을 담을 장소가 전혀 없으므로 초기화 코드도 쓸 수 없다 
+- 리스트 3.8 변경 가능한 확장 프로퍼티 선언하기 
 ```kotlin
 fun main(args: Array<String>) {
     println("kotlin".lastchar) // n
@@ -254,17 +269,13 @@ fun main(args: Array<String>) {
     println(sb) // kotlin!
 }
 
-val String.lastchar: Char
-    get() = get(length-1)
-
 var StringBuilder.lastchar: Char
     get() = get(length-1)
     set(value: Char) {
-        this.setCharAt(length-1, value) // TODO: 여기에 왜 뒷밤침 필드를 둬야 하는지 이해가 안간다 
+        this.setCharAt(length-1, value) 
     }
-
 ```
-- 뒷밤침하는 필드를 둬서(73페이지 참고) 최소한 게터는 꼭 정의를 해야 한다.
+
 
 # 3.4 컬렉션 처리: 가변 길이 인자, 중위 함수 호출, 라이브러리 지원 
 

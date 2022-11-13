@@ -28,8 +28,8 @@ class User(val nickname: String) {
         fun newSubscribingUser(email: String) =
             User(email.substringBefore('@'))
 
-        fun newFacebookUser(facbookAccountId: Int) {
-            User(getFaceBookName(facbookAccountId))
-        }
+//        fun newFacebookUser(facbookAccountId: Int) {
+//            User(getFaceBookName(facbookAccountId))
+//        }
     }
 }

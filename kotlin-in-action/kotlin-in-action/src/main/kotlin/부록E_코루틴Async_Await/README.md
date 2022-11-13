@@ -110,6 +110,8 @@ fun main(args: Array<String>) {
 - 이를 방지하려면 비동기적으로 launch를 실행하거나 launch가 모두 다 실행될 때까지 기다려야 한다 
 - 코루틴의 실행이 끝날 때까지 현재 스레드를 블록시키는 함수 runBlocking()이 있다 
 - runBlocking은 CoroutineScope의 확장함수가 아니라 일반함수라 별도의 코루튼 스코프 객체 없이 사용가능하다 
+- 로빈 추가 : 실무에서 runBlocking은 잘 안쓴다 
+  - 코루틴 쓰는 이유가 없다 
 ```kotlin
 fun runBlockingExample() {
     runBlocking {
@@ -242,7 +244,7 @@ fun sumAll() {
 - 사실 CoroutineScope는 CoroutineContext 필드를 launch 등의 확장 함수 내부에서 사용하기 위한 매개체 역할만을 담당 
 - 원한다면 launch 등에 CoroutineContext를 넘길 수도 있다는 점에서 실제로 CoroutineScope 보다 CoroutineContext가 더 중요한 의미가 있음을 유추 
 - 
-- CoroutineContext는 실제로 코루틴이 실행 중인 여러 작업(Job 타입)과 디스패처를 저장하는 일조으이 맵이라 할 수 있다 
+- CoroutineContext는 실제로 코루틴이 실행 중인 여러 작업(Job 타입)과 디스패처를 저장하는 일종의 맵이라 할 수 있다 
 - 코틀린 런타임이 이 CoroutineContext를 사용해서 다음에 실행할 작업을 선정하고 어떻게 스레드에 배정할지에 대한 방법을 결정 
 ```kotlin
  runBlocking {

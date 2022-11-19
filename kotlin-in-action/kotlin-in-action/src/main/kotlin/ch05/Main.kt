@@ -1,5 +1,7 @@
 package ch05
 
+import java.util.*
+
 fun main(args: Array<String>) {
 //    val people = listOf(Person("Alice", 29), Person("Bob", 31))
 //    println(people.maxBy { it.age })
@@ -10,38 +12,41 @@ fun main(args: Array<String>) {
 //    println(sum(3, 5))
 //    run{ println(42) }
 
-    val people = listOf(Person("이몽룡", 29), Person("성춘향", 31))
-    var names = people.joinToString(separator = " ",
-        transform = { p: Person -> p.name })
-    println(names)
-    names = people.joinToString(separator = " ") {
-            p: Person -> p.name
-    }
-    println(names)
+//
 
-    // 5.1.4 ~
-    val errors = listOf("403 Forbidden", "404 Not Found")
-    printMessageWithPrefix(errors, "Error : ")
+    // 5.2.1
+//    val list = listOf(1, 2, 3, 4)
+//    println(list.filter { it % 2 == 0 }) // [2, 4]
 
-    val responses = listOf("200 ok", "418 i'm a teapot", "500 internal server error")
-    printProblemCounts(responses)
+//    val people = listOf(Person("Alice", 45), Person("Bob", 31))
+//    println(people.filter { it.age > 30 }) // [Person(name=Alice, age=45), Person(name=Bob, age=31)]
+//
+//    val list = listOf(1, 2, 3, 4)
+//    println(list.map{ it * it })
 
-    // 5.1.5 ~
-    run(::salute) // Salute!!
+    val people = listOf(Person("Alice", 45), Person("Bob", 31))
+    println(people.map { it.name }) // [Alice, Bob]
+    println(people.map(Person::name)) // [Alice, Bob]
 
-    val createPerson = ::Person
-    val p = createPerson("Alice", 29)
-    println(p)
+    println(people.filter { it.age > 30 }.map(Person::name))
 
-    val predicate = Person::isAdult
+    println(people.filter { it.age == people.maxBy(Person::age)!!.age })
+
+    val maxAge = people.maxBy(Person::age)!!.age
+    people.filter { it.age == maxAge }
+
+    val numbers = mapOf(0 to "zero", 1 to "one")
+    println(numbers.mapValues { it.value.toUpperCase() }) // {0=ZERO, 1=ONE}
+    println(numbers.mapValues { it.value.uppercase(Locale.getDefault()) }) // {0=ZERO, 1=ONE}
+
 }
 
 fun Person.isAdult() = age >= 21
 
 fun salute() = println("Salute!!")
 
-fun printMessageWithPrefix(messages: Collection<String>, prefix:String) {
-    messages.forEach{
+fun printMessageWithPrefix(messages: Collection<String>, prefix: String) {
+    messages.forEach {
         println("$prefix $it")
     }
 }
@@ -49,7 +54,7 @@ fun printMessageWithPrefix(messages: Collection<String>, prefix:String) {
 fun printProblemCounts(responses: Collection<String>) {
     var clientErrors = 0
     var severErrors = 0
-    responses.forEach{
+    responses.forEach {
         if (it.startsWith("4")) {
             clientErrors++
         } else if (it.startsWith("5")) {

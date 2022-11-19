@@ -371,10 +371,74 @@ println(dmitryAgeFunction()) // 34
 - dmitryAgeFunction는 인자가 없는 (참조를 만들 때 p가 가리키던 사람의 나이를 반환) 함수라는 점에 유의하라 
 - 코틀린 1.0에서는 p::age 대신에 { p.age } 라고 직접 객체의 프로퍼티를 돌려주는 람다를 만들어야 한다 
 
+# 5.2 컬렉션 함수형 API 
+- 함수형 프로그래밍 스타일을 사용하면 컬렉션을 다룰 때 편리하다 
+- 이번 절에서는 컬렉션을 다루는 코틀린 표준 라이브러리 몇가지를 살펴보자
 
+## 5.2.1 필수적인 함수 : filter와 map 
+- filter와 map은 컬렉션을 활용할 때 기반이 되는 함수 
+  - 대부분의 컬렉션 연산을 이 두 함수를 통해 표현 가능 
+```kotlin
+data class Person(val name: String, val age: Int)
+```
+- filter 함수 (필터 함수 또는 걸러내는 함수라고 부름)는 컬렉션을 이터레이션하면서 주어진 람다에 각 원소를 넘겨서 람다가 true를 반환하는 원소만 모은다
+```kotlin
+val list = listOf(1, 2, 3, 4)
+println(list.filter { it % 2 == 0 }) // [2, 4]
+```
+- 결과는 입력 컬렉션의 원소 중에서 술어 (참/거짓을 반환하는 함수를 술어 predicate라고 한다)를 만족하는 원소만으로 이뤄진 새로운 컬렉션이다. 
+- 30살 이상인 사람만 필요하다면 filter를 사용한다 
+```kotlin
+    val people = listOf(Person("Alice", 45), Person("Bob", 31))
+    println(people.filter { it.age > 30 }) // [Person(name=Alice, age=45), Person(name=Bob, age=31)]
+```
+- filter 함수는 컬렉션에서 원치 않는 원소를 제거한다 
+- 하지만 filter는 원소를 변환할 수는 없다. 원소를 변환하려면 map을 사용한다 
+- map
+- map함수는 주어진 람다를 컬렉션의 각 원소에 적용한 결과를 모아서 새 컬렉션을 만든다 
+- 다음과 같이 하면 숫자로 이뤄진 리스트를 각 숫자의 제곱이 모인 리스트로 바꿀 수 있다
+```kotlin
+    val list = listOf(1, 2, 3, 4)
+    println(list.map{ it * it }) // [1, 4, 9, 16]
+```
+- 이름의 리스트 출력 : map으로 사람의 리스트 -> 이름의 리스트 
+```kotlin
+    val people = listOf(Person("Alice", 45), Person("Bob", 31))
+    println(people.map { it.name }) // [Alice, Bob]
+```
+- 더 간결하게 
+```kotlin
+people.map(Person::name)
+```
+- 이런 호출을 쉽게 연쇄 시킬 수 있다 (30살 이상의 사람 이름)
+```kotlin
+ println(people.filter { it.age > 30 }.map(Person::name))
+```
+- 이제 이 목록에서 가장 나이가 많은 사람의 이름을 알고 싶을 때 
+  - 먼저 목록에 있는 사람들의 나이의 최대값을 구하고 나이가 그 최댓값과 같은 모든 사람 반환하기 
+  ```kotlin
+  people.filter { it.age == people.maxBy(Person::age)!!.age }
+  ```
+  - 하지만 이 코드는 목록에서 최대값을 구하는 작업을 계속 반복한다는 단점
+    - 100명의 사람이 있다면 100번 최댓값 연산을 수행한다 
+  - 다음은 이를 좀 더 개선한 코드
+  ```kotlin
+    val maxAge = people.maxBy(Person::age)!!.age
+    people.filter { it.age == maxAge }
+  ```
+  - 꼭 필요하지 않는 경우 굳이 계산을 반복하지 말라 
+  - 람다를 인자로 받는 함수에 람다를 넘기면 겉으로 볼 대는 단순해 보이는 식이 내부 로직의 복잡도로 인해 실제로는 엄청나게 불합리한 계산식이 될 때가 있다 
 
+- 필터와 변환 함수를 맵에 적용할 수 있다 
+```kotlin
+val numbers = mapOf(0 to "zero", 1 to "one")
+println(numbers.mapValues { it.value.toUpperCase() }) // {0=ZERO, 1=ONE}
+println(numbers.mapValues { it.value.uppercase(Locale.getDefault()) }) // {0=ZERO, 1=ONE} toUpperCase() deprecated 되었다
+```
+- 맵의 경우 키와 값을 처리하는 함수가 따로 존재 
+- filterKeys와 mapKeys는 키를 걸러 내거나 변환하고, filterValues와 mapValues는 값을 걸러 내거나 변환한다 
 
-
+## 5.2.2 all, any, count, find: 컬렉션에 술어 적용
 
 
 

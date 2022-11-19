@@ -208,4 +208,251 @@ val sum = { x: Int, y: Int ->
   x + y
 }
 ```
-- 본문이 여러 줄로 이뤄진 경우 본문의 맨 마지막에 있는 식리 람다의 결과 값
+- 본문이 여러 줄로 이뤄진 경우 본문의 맨 마지막에 있는 식리 람다의 결과 
+
+## 5.1.4 현재 영역에 있는 변수에 접근 
+- 자바 메서드 안에서 무명 내부 클래스를 정의할 때 메서드의 로컬 변수를 무명 내부 클래스에서 사용할 수 있다 
+- 람다 안에서도 같은 일을 할 수 있다 
+- 람다를 함수 안에서 정의하면 함수의 파라미터 뿐 아니라 람다 정의의 앞에 선언된 로컬 변수까지 람다에서 모두 사용할 수 있다 
+- forEach는 컬렉션의 모든 원소에 대해 람다를 호출해준다 
+- 리스트 5.10 함수 파라미터를 람다 안에서 사용하기 
+```kotlin
+fun printMessageWithPrefix(messages: Collection<String>, prefix:String) {
+    messages.forEach{
+        println("$prefix $it")
+    }
+}
+```
+```kotlin
+val errors = listOf("403 Forbidden", "404 Not Found")
+printMessageWithPrefix(errors, "Error : ")
+/** Error :  403 Forbidden
+Error :  404 Not Found **/
+```
+- 자바와 다른점 : 코틀린은 람다 안에서는 파이널 변수가 아닌 변수에 접근할 수 있다 
+  - 또한 람다 안에서 바깥의 변수를 변경해도 된다 
+- 리스트 5.11 람다 안에서 바깥의 로컬 변수 변경하기 
+```kotlin
+fun printProblemCounts(responses: Collection<String>) {
+    var clientErrors = 0
+    var severErrors = 0
+    responses.forEach{
+        if (it.startsWith("4")) {
+            clientErrors++
+        } else if (it.startsWith("5")) {
+            severErrors++
+        }
+    }
+    println("$clientErrors client errors, $severErrors server errors")
+}
+```
+```kotlin
+  val responses = listOf("200 ok", "418 i'm a teapot", "500 internal server error")
+    printProblemCounts(responses) // 1 client errors, 1 server errors
+```
+- 코틀린에서는 자바와 달리 람다에서 람다 밖 함수에 있는 파이널이 아닌 변수에 접근할 수 있고 그 변수를 변경할 수 도 있다 
+- 람다 안에서 사용하는 외부 변수를 람다가 포획 capture한 변수라고 부른다 
+- 기본적으로 함수 안에 정의된 로컬 변수의 생명 주기는 함수가 반환되면 끝난다 
+- 하지만 어떤 함수가 자신의 로컬 변수를 포획한 람다를 반환하거나 다른 변수에 저장한다면 로컬 변수의 생명주기와 함수의 생명 주기가 달라질 수 있다 
+- 포획한 변수가 있는 람다를 저장해서 함수가 끝난 뒤에 실행해도 람다의 본문 코드는 여전히 포획한 변수를 읽거나 쓸 수 있다
+- 어떻게 이가 가능할까?
+- 파이널 변수를 포획한 경우에는 람다 코드를 변수 값과 함께 저장 
+- 파이널이 아닌 변수를 포획한 경우에는 변수를 특별한 래퍼로 감싸서 나중에 변경하거나 읽을 수 있게 한 다음, 래퍼에 대한 참조를 람다 코드와 함께 저장 
+- 변경 가능한 변수 포획하기: 자세한 구현 
+  - 자바에서는 파이널 변수만 포획 가능 
+  - 교묘한 속임수로 변경 가능한 변수 포획 가능 
+  - 그 속임수는 변경 가능한 변수를 저장하는 원소가 단 하나뿐인 배열을 선언하거나
+  - 변경 가능한 변수를 필드로 하는 클래스를 선언하는 것 
+  - 안에 들어있는 원소는 변경 가능할지라도 배열이나 클래스 인스턴스에 대한 참조를 final로 만들면 포획 가능 
+```kotlin
+class Ref<T>(var value: T) // 변경 가능한 변수를 포획하는 방법을 보여주기 위한 클래스 
+// val counter = Ref(0)
+// val inc = { counter.value++ } // 공식적으로는 변경 불가능 변수를 포획했지만 그 변수가 가리키는 객체의 필드 값을 바꿀 수 있다
+```
+- 실제 코드에서는 이런 래퍼를 만들지 않아도 된다 
+- 대신 변수를 직접 바꾼다 
+```kotlin
+var counter = 0
+val inc = { counter++ }
+```
+- 이 코틀린 코드가 어떻게 작동할까?
+- 첫버째 예제는 두번쨰 예제가 작동하는 내부 모습을 보여준다 
+- 람다가 파이널 변수 (val)를 포획하면 자바와 마찬가지로 그 변수의 값이 복사된다 
+- 하지만 람다가 변경 가능한 변수(var)를 포획하면 변수를 ref 클래스 인스턴스에 넣는다
+- 그 ref 인스턴스에 대한 참조를 파이널로 만들면 쉽게 람다로 포획할 수 있고, 람다 안에서는 ref 인스턴스의 필드를 변경할 수 있다 
+- 한 가지 꼭 알아둬야 할 것 
+  - 람다를 이벤트 핸들러나 다른 비동기적으로 실행되는 코드로 활용하는 경우 함수 호출이 끝난 다음에 로컬 변수가 변경될 수도 있다 
+  - 예를 들어 다음 코드는 버튼 클릭 횟수를 제대로 셀 수 없다. 
+```kotlin
+fun tryToCountButtonClicks(button: Button): Int {
+    var clicks = 0
+    button.onClick { clicks++ }
+    return clicks
+}
+```
+- 이 함수는 항상 0을 반환한다. 
+  - onClick 핸들러는 호출될 때마다 clicks의 값을 증가시키지만 그 값의 변경을 관찰할 수는 없다 
+  - 핸들러는 tryToCountButtonClicks 가 clicks를 반환한 다음에 호출되기 때문이다. 
+  - 이 함수를 제대로 구현하려면 클릭 횟수를 세는 카운터 변수를 함수의 내부가 아니라 
+  - 클래스의 프로퍼티나 전역 프로퍼티 등의 위치로 빼내서 나중에 변수 변화를 살펴볼 수 있게 해야 한다. 
+```kotlin
+// todo : 위에가 무슨 말일까 
+```
+
+## 5.1.5 멤버 참조 
+- 람다를 사용해 코드 블록을 다른 함수에게 인자로 넘기는 방법을 살펴봤다. 
+- 하지만 넘기려는 코드가 이미 함수로 선언된 경우는 어떻게 해야 할까?
+- 물론 그 함수를 호출하는 람다를 만들면 된다. 
+- 하지만 이는 중복이다. 
+- 함수를 직접 넘길 수는 없을까?
+- 코틀린에서는 자바 8과 마찬가지로 함수를 값으로 바꿀 수 있다. 
+- 이때 이중 콜론 (::) 을 사용한다 
+````kotlin
+val getAge = Person::age
+````
+- :: 를 사용하는 식을 멤버참조 member reference라고 부른다. 
+- 멤버 참조는 프로퍼티나 메서드를 단 하나만 호출하는 함수 값을 만들어준다. 
+- :: 는 클래스 이름과 여러분이 참조하려는 멤버 (프로퍼티나 메서드) 이름 사이에 위치한다. 
+-  Person::age 는 `val getAage = { person: Person -> person.age }` 식을 더 간략하게 표현한 것 
+- 참조 대상이 함수인지 프로퍼티인지와는 관계 없이 멤버 참조 뒤에는 괄호를 넣으면 안된다 
+- 멤버 참조는 그 멤버를 호출하는 람다와 같은 타입이다 
+- 따라서 다음 예처럼 그 둘을 자유롭게 바꿔 쓸 수 있다 
+```kotlin
+peopel.maxBy(Person::age)
+people.maxBy { p -> p.age }
+people.maxBy { it.age }
+```
+- 최상위에 선언된 (그리고 다른 클래스의 멤버가 아닌) 함수나 프로퍼티를 참조할 수 있다 
+```kotlin
+fun salute() = println("Salute!")
+// run(::salute) // Salute!! (최상위 함수를 참조한다) 
+```
+- 클래스 이름을 생략하고 ::로 참조를 바로 시작한다 
+- :: salute 라는 멤버 참조를 run 라이브러리 함수에 넘긴다 (run 은 인자로 받은 다른 함수를 호출한다)
+- 람
+- 람다가 인자가 여럿인 다른 함수한테 작업을 위임하는 경우 람다를 정의하지 않고 직접 위임 함수에 대한 참조를 제공하면 편리하다. 
+```kotlin
+val action = { person: Person, message: String -> // 이 람다는 sendEmail 함수에게 작업을 위임한다 
+  sendEamil(person, message) 
+}
+
+val nextAction = ::sendEmail // 람다대신 멤버 참조를 쓸 수 있다 
+```
+- 생성자 참조 constructor reference 를 사용하면 클래스 생성 작업을 연기하거나 저장해둘 수 있다 
+  - :: 뒤에 클래스 이름을 넣으면 생성자 참조를 만들 수 있다 
+```kotlin
+data class Person(val name: String, val age: Int)
+// val createPerson = ::Person // "Person" 의 인스턴스를 만드는 동작을 값으로 저장한다
+// val p = createPerson("Alice", 29)
+// print(p) // Person(name=Alice, age=29)
+```
+- 확장함수도 멤버 함수와 똑같은 방식으로 참조할 수 있다는 점을 기억해라 
+```kotlin
+fun Person.isAdult() = age >= 21
+val predicate = Person::isAdult
+```
+- isAdult는 클래스의 멤버가 아니고 확장함수다
+  - 그렇지만 isAdult를 호출할 때 person.isAult()로 인스턴스 멤버 호출 구문을 쓸 수 있는 것처럼 
+  - Person::isAudult로 멤버 참조 구문을 사용해 이 확장 함수에 대한 참조를 얻을 수 있다 
+- 바운드 멤버 참조 
+  - 코틀린 1.0에서는 클래스의 메서드나 프로퍼티에 대한 참조를 얻은 다음에 그 참조를 호출할 때 항상 인스턴스 객체를 제공해야 했다 
+  - 코틀린 1.1 부터는 바운드 멤버 참조 bound member reference를 지원한다 
+  - 바운드 멤버 참조를 사용하면 멤버 참조를 생성할 때 클래스 인스턴스를 함께 저장한 다음에 나중에 그 인스턴스에 대해 멤버를 호출해준다 
+  - 따라서 호출시 수신 대상 객체를 별도로 지정해줄 필요가 없다 
+```kotlin
+val p = Person("Alice", 34)
+val personsAgeFunction = Person::age
+println(personsAgeFunction(p)) // 34
+
+val dmitryAgeFunction = p.age // 코틀린 1.1 부터 사용할 수 있는 바운드 멤버 참조
+println(dmitryAgeFunction()) // 34
+```
+- 여기서 personsAgeFunction 은 인자가 하나(인자로 받은 사람이 나이를 반환)이지만 
+- dmitryAgeFunction는 인자가 없는 (참조를 만들 때 p가 가리키던 사람의 나이를 반환) 함수라는 점에 유의하라 
+- 코틀린 1.0에서는 p::age 대신에 { p.age } 라고 직접 객체의 프로퍼티를 돌려주는 람다를 만들어야 한다 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

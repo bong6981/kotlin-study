@@ -19,5 +19,42 @@ fun main(args: Array<String>) {
     }
     println(names)
 
+    // 5.1.4 ~
+    val errors = listOf("403 Forbidden", "404 Not Found")
+    printMessageWithPrefix(errors, "Error : ")
 
+    val responses = listOf("200 ok", "418 i'm a teapot", "500 internal server error")
+    printProblemCounts(responses)
+
+    // 5.1.5 ~
+    run(::salute) // Salute!!
+
+    val createPerson = ::Person
+    val p = createPerson("Alice", 29)
+    println(p)
+
+    val predicate = Person::isAdult
+}
+
+fun Person.isAdult() = age >= 21
+
+fun salute() = println("Salute!!")
+
+fun printMessageWithPrefix(messages: Collection<String>, prefix:String) {
+    messages.forEach{
+        println("$prefix $it")
+    }
+}
+
+fun printProblemCounts(responses: Collection<String>) {
+    var clientErrors = 0
+    var severErrors = 0
+    responses.forEach{
+        if (it.startsWith("4")) {
+            clientErrors++
+        } else if (it.startsWith("5")) {
+            severErrors++
+        }
+    }
+    println("$clientErrors client errors, $severErrors server errors")
 }

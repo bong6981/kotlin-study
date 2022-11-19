@@ -40,9 +40,9 @@ fun main(args: Array<String>) {
 //    val facebookUser = User.newFacebookUser(4)
 
     // 4.4.3 ~
-    loadFromJson(Person)
-    val something : JSONFactory<Person> = Person
-    val something1 : JSONFactory<Person> = Person.Companion
+//    loadFromJson(Person)
+//    val something : JSONFactory<Person> = Person
+//    val something1 : JSONFactory<Person> = Person.Companion
 
 }
 

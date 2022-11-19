@@ -7,10 +7,12 @@ package ch04
 //    }
 //}
 
-class Person(val name: String) {
-    companion object : JSONFactory<Person> {
-        override fun fromJSON(jsonText: String): Person {
-            TODO("Not yet implemented")
-        }
-    }
-}
+//class Person(val name: String) {
+//    companion object : JSONFactory<Person> {
+//        override fun fromJSON(jsonText: String): Person {
+//            TODO("Not yet implemented")
+//        }
+//    }
+//}
+
+data class Person(val name: String, val age: Int)

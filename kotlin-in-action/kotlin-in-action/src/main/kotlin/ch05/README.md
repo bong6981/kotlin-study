@@ -856,6 +856,80 @@ buton.setOnClickListener{ view -> ...}
   - 함수 선언에서 함수 타입을 사용하는 방법은 8.1 절에서 
 - 이제 함수형 인터페이스 타입을 인자로 요구하는 자바 메서드에 람다를 전달하는 경우 어떤 일이 벌어지나 살펴보자 
 
+## 5.4.1 자바 메서드에 람다를 인자로 전달 
+- 함수형 인터페이스를 인자로 원하는 자바 메서드에 코틀린 람다를 전달할 수 있다 
+- 예를 들어 다음 메서드는 runnable 타입의 파라미터를 받는다 
+```java
+void postponeComputation(int delay, Runnable computation);
+```
+- 코틀린에서는 람다를 이 함수에 넘길 수 있다 
+- 컴파일러는 자동으로 람다를 Runnable 인스턴스로 변환해 준다 
+```kotlin
+postponeComputation(1000) { println(42) }
+```
+- 여기서 Runnable 인스턴스라는 말은 실제로는 Runnable 을 구현한 무명 클래스의 인스턴스 라는 뜻 
+- 컴파일러는 자동으로 그런 무명 클래스와 인스턴스를 만들어준다 
+- 이때 그 무명 클래스에 있는 유일한 추상 메서드를 구현할 때 람다 본문을 메서드의 본문으로 사용한다 
+- 여기서는 Runnable의 run이 그런 추상 메서드 
+- Runnable 을 구현하는 무명 객체를 명시적으로 만들어 사용할 수도 있다
+
+```kotlin
+postponeComputation(1000, object : Runnable { // 객체 식을 함수형 인터페이스 구현으로 넘긴다
+  override fun run() {
+    println(42)
+  }
+}) 
+```
+- 하지만 람다와 무명 객체 사이에는 차이가 있다 
+- 객체를 명시적으로 선언하는 경우 메서드 호출 때마다 새로운 객체 생성 
+- 람다는 다르다. 정의가 들어이쓴ㄴ 변수에 접근하지 않는 람다에 대응하는 무명 객체를 메서드를 호출할 때마다 반복 사용 
+```kotlin
+postponeComputation(1000) { println(42) } // 프로그램 전체에서 Runnable의 인스턴스는 단 하나만 만들어진다
+```
+- 따라서 명시적인 object 선언을 사용하면서 람다와 동일한 코드는 다음과 같다 
+- 이 경우 Runnable 인스턴스를 변수에 저장하고 메서드를 호출할 때마다 그 인스턴스를 사용한다 
+```kotlin
+val runnable = Runnable{ println(42) } // Runnable 은 sam 생성자 // 전역 변수로 컴파일되므로 프로그램 안에 단 하나의 인스턴스만 존재
+fun handleComputation() {
+  postponeComputation(1000, runnable) // 모든 handleComputation 호출에 같은 객체 사용
+}
+```
+- 람다가 주변 영역의 변수를 포획한다면 매 호출마다 같은 인스턴스 사용 불가 
+- 그런 경우 컴파일러는 매번 주변 영역의 변수를 포획한 새 인스턴스 생성
+- 예를 들어 다음 하수에서 id를 필드로 저장하는 새로운 Runnable 인스턴스를 매번 새로 만들어 사용 
+```kotlin
+fun handleComputation(id: String) { // 람다 안에서 id 변수 포획 
+  postponeComputation(1000) { println(id) } // handleComputation 호출할 때마다 새로 Runnable 인스턴스 만든다
+}
+```
+- 람다의 자세한 구현 
+  - 코틀린 1.0 inline 되지 않은 모든 람다식은 무명 클래스로 컴파일 된다 
+  - 람다가 변수를 포획하면 무명 클래승 안에 포획한 변수를 저장하는 필드가 생기고 매 호출마다 그 무명 클래스의 인스턴스를 새로 만든다 
+  - 하지만 포획하는 변수가 없는 람다에 대해서는 인스턴스가 단 하나만 생긴다 handleComputation 처럼 람다가 선언된 함수 이름을 접두사로 하는 이름이 람다를 컴파일한 클래스에 붙는다 
+  - 다음은 앞에 살펴본 포획이 있는 람다 식의 바이트코드를 디컴파일 하면 볼 수 있는 코드 
+  ```kotlin
+  class HandleComputation$1(val id: String) : Runnable { 
+    overide fun run() {
+        println(id)
+    }
+   }
+  
+  fun handleComputation(id: String) {
+    postponeComputation(1000, HandleComputation(id)) // 내부적으로는 람다 대신 특별한 클래스의 인스턴스 만들어짐
+  }
+  ```
+  - 컴파일러는 포획한 변수마다 그 값을 저장하기 위한 필드를 만든다 
+  - 코틀린 1.5 부터는 코틀린에서 정의한 함수형 인터페이스를 jvm 8 이상의 백엔드 타겟으로 빌드하는 경우 
+    - invokedynamic을 사용한 람다로 변환 
+    - LamdaMetafactory.metafoctory()를 상용
+- 람다에 대해 무명 클래스를 만들고 그 클래스의 인스턴스를 만들어 메서드에 넘긴다는 설명은 함수형 인터페이스를 받는 자바 메서드를 코틀린에서 호출할 때 쓰는 방식을 설명 
+- 컬렉션을 확장한 메서드에 람다를 넘기는 경우 코틀린은 그런 방식을 사용 안한다 
+- 코틀린 inline으로 표시된 코틀린 함수에게 람다를 넘기면 아무 무명 클래스도 만들어지지 않는다 
+- 대부분 코틀린 함수는 inline 표시가 붙어 있으면 이에 대해서는 8.2 절 
+- 지금까지 살펴본 람다와 자바 함수형 인터페이스 사이의 변환은 컴파일러가 자동으로 
+- 어쩔 수 없이 수동으로 변환해야 하는 경우 어떻게 할지 살펴보자 
+
+
 
 
 

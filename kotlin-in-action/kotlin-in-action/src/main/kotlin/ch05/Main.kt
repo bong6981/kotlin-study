@@ -101,6 +101,8 @@ fun main(args: Array<String>) {
 
     val file = File("/Users/svtk/.HiddenDir/a.txt")
     println(file.isInsideHiddenDirectory())
+
+
 }
 
 fun File.isInsideHiddenDirectory() =

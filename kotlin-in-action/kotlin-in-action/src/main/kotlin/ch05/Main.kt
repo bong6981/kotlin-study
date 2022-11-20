@@ -39,7 +39,7 @@ fun main(args: Array<String>) {
 //    println(numbers.mapValues { it.value.toUpperCase() }) // {0=ZERO, 1=ONE}
 //    println(numbers.mapValues { it.value.uppercase(Locale.getDefault()) }) // {0=ZERO, 1=ONE}
 
-    val canBeInClub27 = {p: Person -> p.age > 27}
+    val canBeInClub27 = { p: Person -> p.age > 27 }
 //    val people = listOf(Person("Alice", 27), Person("Bob", 31))
 //    println(people.all(canBeInClub27)) // false
 //    println(people.any(canBeInClub27)) //true
@@ -58,14 +58,25 @@ fun main(args: Array<String>) {
 //    println(people.find(canBeInClub27)) // Person(name=Bob, age=31)
 
     //5.2.3 ~
-    val people = listOf(Person("Alice", 27), Person("Bob", 29), Person("Carol", 31))
-    println(people.groupBy { it.age }) //{27=[Person(name=Alice, age=27)], 29=[Person(name=Bob, age=29)], 31=[Person(name=Carol, age=31)]}
+//    val people = listOf(Person("Alice", 27), Person("Bob", 29), Person("Carol", 31))
+//    println(people.groupBy { it.age }) //{27=[Person(name=Alice, age=27)], 29=[Person(name=Bob, age=29)], 31=[Person(name=Carol, age=31)]}
+//
+//    val list = listOf("a", "ab", "b")
+//    println(list.groupBy(String::first))
 
-    val list = listOf("a", "ab", "b")
-    println(list.groupBy(String::first))
+    //5.2.4 ~
+    val strings = listOf("abc", "def")
+    println(strings.flatMap { it.toList() })
+
+    val books = listOf(
+        Book("Thursday Next", listOf("Jasper Fforde")),
+        Book("Mort", listOf("Terry Pratchett")),
+        Book("Good Omens", listOf("Terry Pratchett", "Neil Gaiman"))
+    )
+    println(books.flatMap { it.authors }.toSet()) // [Jasper Fforde, Terry Pratchett, Neil Gaiman]
+    println(books.flatMap { it.authors }) // [Jasper Fforde, Terry Pratchett, Terry Pratchett, Neil Gaiman]
 
 }
-
 
 
 fun Person.isAdult() = age >= 21

@@ -510,6 +510,39 @@ println(list.groupBy(String::first)) //{a=[a, ab], b=[b]}
 ```
 - first는 string의 멤버가 아니라 확장함수지만 여전히 멤버 참조를 사용해 first에 접근할 수 있다 
 
+## 5.2.4 flatMap과 flatten: 중첩된 컬렉션 안의 원소 처리 
+```kotlin
+class Book(val title: String, val authors: List<String>)
+```
+- 도서관에 있는 책의 저자를 모두 모은 집합 
+```kotlin
+    books.flatMap { it.authors }.toSet() // books 컬렉션에 있는 책을 쓴 모든 저자의 집합 
+```
+- flatMap 함수는 먼저 인자로 주어진 람다를 컬렉션 객체에 적용하고 (또는 매핑 map)
+  - 람다를 적용한 결과 얻어지는 여러 리스트를 한 리스트로 한데 모은다 (또는 펼치기 flatten)
+```kotlin
+  val strings = listOf("abc", "def")
+    println(strings.flatMap { it.toList() }) // [a, b, c, d, e, f]
+
+```
+- map을 해서 [ a, b, c, ], [c, d, e] -> flatten 해서 [a, b, c, d, e, f]
+  - toList 함수를 문자열에 적용하면 그 문자열에 속한 모든 문자로 이뤄진 리스트가 만들어진다 
+  - flatMap함수는 다음 단계로 리스트의 리스트에 들어있던 모든 우너소로 이뤄진 단일 리스트를 반환 
+```kotlin
+  val books = listOf(
+        Book("Thursday Next", listOf("Jasper Fforde")),
+        Book("Mort", listOf("Terry Pratchett")),
+        Book("Good Omens", listOf("Terry Pratchett", "Neil Gaiman"))
+    )
+    println(books.flatMap { it.authors }.toSet()) // [Jasper Fforde, Terry Pratchett, Neil Gaiman]
+    println(books.flatMap { it.authors }) // [Jasper Fforde, Terry Pratchett, Terry Pratchett, Neil Gaiman]
+```
+- 리스트의 리스트가 있는데 모든 중첩된 리스트의 원소를 한 리스트로 모아야 한다면 flayMap을 떠올릴 수 있을 것이다 
+- 하지만 특별히 변환해야 할 내용이 없다면 리스트의 리스트를 평평하게 펼치기만 하면 된다 
+- 그런경우 listOfLists.flatten() 처럼 flatten 함수를 사용할 수 있다 
+- 자
+- 컬렉션을 다루는 코드를 작성할 경우에는 원하는 바를 어떻게 일반적인 변환을 사용해 표현할 수 있는지 생각해보고 그런 변환을 제공하는 라이브러리 함수가 있는지 살펴보라 
+- 대부분 찾을 수 있고 직접 코드 구현보다 빨리 문제 해결할 수 있다 
 
 
 

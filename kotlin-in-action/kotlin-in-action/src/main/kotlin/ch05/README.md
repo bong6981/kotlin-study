@@ -439,7 +439,57 @@ println(numbers.mapValues { it.value.uppercase(Locale.getDefault()) }) // {0=ZER
 - filterKeys와 mapKeys는 키를 걸러 내거나 변환하고, filterValues와 mapValues는 값을 걸러 내거나 변환한다 
 
 ## 5.2.2 all, any, count, find: 컬렉션에 술어 적용
-
+- 컬렉션에 대해 자주 수행하는 연산으로 컬렉션의 모든 원소가 어떤 조건을 만족하는지 판단하는
+  - 또는 그 변종으로 컬렉션 안에 어떤 조건을 만족하는 어떤 원소가 있는지 판단하는 연산이 있다 
+- 코틀린에서는 all, any 가 이런 연산이다 
+- count 함수는 조건을 만족하는 원소의 개수 반환
+- find 함수는 조건을 만족하는 첫 번째 원소를 반환
+- 나이가 27살 이하인지 판단하는 술어 함수 canBeInClub27
+```kotlin
+    val canBeInClub27 = {p: Person -> p.age > 27}
+```
+- 모든 원소가 이 술어를 만족하는지 궁금하다면 all 함수를 쓴다 
+```kotlin
+    val canBeInClub27 = {p: Person -> p.age > 27}
+    val people = listOf(Person("Alice", 27), Person("Bob", 31))
+    println(people.all(canBeInClub27)) // false
+```
+- 술어를 만족하는 원소가 하나라도 있는지 궁금하면 any
+```kotlin
+  println(people.any(canBeInClub27)) //true
+```
+- 어떤 조건에 대해 !all을 수행한 결과와 그 조건의 부정에 대해 any를 수행한 결과는 같다 ( 드 모르강의 법칙)
+- 어떤 조건에 대해 !any를 수행한 결과와 그 조건의 부정에 대해 all을 수행한 결과도 같다 
+- 가독성을 높이려면 any와 all 앞에 !를 붙이지 않는 편이 낫다 
+```kotlin
+    val list = listOf(1, 2, 3)
+    println(!list.all{it == 3})  // true
+    /**
+     * !를 눈치 채지 못하는 경우가 자주 있다 이럴 땐 any가 더 낫다
+     */
+    println(list.any{it == 3}) // ture any를 사용하려면 술어를 부정해야 한다 
+```
+- 술어를 만족하는 원소의 개수를 구하려면 count 사용 
+```kotlin
+    val people = listOf(Person("Alice", 27), Person("Bob", 31))
+    println(people.count(canBeInClub27))
+```
+- 함수를 적재 적소에 사용하라 count, size 
+  - count가 있다는 사실을 잊어버리고 컬렉셜 필터링한 결과의 크기를 가져오는 경우가 있다 
+  ```kotlin
+      println( people.filter(canBeInClub27).size)
+  ```
+  - 하지만 이렇게 처리하면 조건을 만족하는 모든 원소가 들어가는 중간 컬렉션이 생긴다 
+  - 반면 count는 조건을 만족하는 원소의 개만을 추적하지 조건을 만족하는 원소를 따로 저장하지 x 
+  - 따라서 count가 훨씬 효율적 
+- 술어를 만족하는 원소를 하나 찾고 싶으면 find 함수를 사용한다 
+```kotlin
+println(people.find(canBeInClub27)) // Person(name=Bob, age=31)
+```
+- 이 식은 조건을 만족하는 우너소가 하나라도 있는 경우 가장 먼저 조건을 만족한다고 확인한 원소 반환 
+  - 만족하는 원소가 하나도 없는 경우 null을 반환 
+  - find는 firstOrNull과 같다 
+  - 조건을 만족하는 원소가 없으면 null이 나온다는 사실을 더 명확히 하고 싶다면 firstOrNull을 쓸 수 있다 
 
 
 

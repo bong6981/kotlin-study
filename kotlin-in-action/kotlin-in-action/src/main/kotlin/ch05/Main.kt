@@ -23,23 +23,44 @@ fun main(args: Array<String>) {
 //
 //    val list = listOf(1, 2, 3, 4)
 //    println(list.map{ it * it })
+//
+//    val people = listOf(Person("Alice", 45), Person("Bob", 31))
+//    println(people.map { it.name }) // [Alice, Bob]
+//    println(people.map(Person::name)) // [Alice, Bob]
+//
+//    println(people.filter { it.age > 30 }.map(Person::name))
+//
+//    println(people.filter { it.age == people.maxBy(Person::age)!!.age })
+//
+//    val maxAge = people.maxBy(Person::age)!!.age
+//    people.filter { it.age == maxAge }
+//
+//    val numbers = mapOf(0 to "zero", 1 to "one")
+//    println(numbers.mapValues { it.value.toUpperCase() }) // {0=ZERO, 1=ONE}
+//    println(numbers.mapValues { it.value.uppercase(Locale.getDefault()) }) // {0=ZERO, 1=ONE}
 
-    val people = listOf(Person("Alice", 45), Person("Bob", 31))
-    println(people.map { it.name }) // [Alice, Bob]
-    println(people.map(Person::name)) // [Alice, Bob]
+    val canBeInClub27 = {p: Person -> p.age > 27}
+//    val people = listOf(Person("Alice", 27), Person("Bob", 31))
+//    println(people.all(canBeInClub27)) // false
+//    println(people.any(canBeInClub27)) //true
 
-    println(people.filter { it.age > 30 }.map(Person::name))
+    // 5.2.2 ~
+    val list = listOf(1, 2, 3)
+    println(!list.all{it == 3})  // true
+    /**
+     * !를 눈치 채지 못하는 경우가 자주 있다 이럴 땐 any가 더 낫다
+     */
+    println(list.any{it == 3}) // ture any를 사용하려면 술어를 부정해야 한다
 
-    println(people.filter { it.age == people.maxBy(Person::age)!!.age })
+    val people = listOf(Person("Alice", 27), Person("Bob", 31))
+//    println(people.count(canBeInClub27))
+    println( people.filter(canBeInClub27).size)
+    println(people.find(canBeInClub27)) // Person(name=Bob, age=31)
 
-    val maxAge = people.maxBy(Person::age)!!.age
-    people.filter { it.age == maxAge }
-
-    val numbers = mapOf(0 to "zero", 1 to "one")
-    println(numbers.mapValues { it.value.toUpperCase() }) // {0=ZERO, 1=ONE}
-    println(numbers.mapValues { it.value.uppercase(Locale.getDefault()) }) // {0=ZERO, 1=ONE}
 
 }
+
+
 
 fun Person.isAdult() = age >= 21
 

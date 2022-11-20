@@ -491,7 +491,24 @@ println(people.find(canBeInClub27)) // Person(name=Bob, age=31)
   - find는 firstOrNull과 같다 
   - 조건을 만족하는 원소가 없으면 null이 나온다는 사실을 더 명확히 하고 싶다면 firstOrNull을 쓸 수 있다 
 
+## 5.2.3 groupBy 리스트를 여러 그룹으로 이뤄진 맵으로 변경 
+- 컬렉션의 모든 원소를 어떤 특성에 따라 여러 그룹으로 나누고 싶을 때 
+  - 예를 들어 사람을 나이에 따라 분류 
+  - 특성을 파라미터로 전달하면 컬렉션을 자동으로 구분 해주는 함수 -> groupBy
+```kotlin
+val people = listOf(Person("Alice", 27), Person("Bob", 29), Person("Carol", 31))
+println(people.groupBy { it.age }) //{27=[Person(name=Alice, age=27)], 29=[Person(name=Bob, age=29)], 31=[Person(name=Carol, age=31)]}
 
+```
+- 연산의 결과는 컬렉션의 원소를 구분하는 특성 (이 예제에서는 age)이 키이고, 키 값에 따른 각 그룹이 값인 맵이다 
+- 각 그룹은 리스트다. 따라서 groupBy의 결과 타입은 Map<Int, List<Person>>이다 
+- 필요하면 이 맵을 mapKeys나 mapValues 등을 사용해 변경할 수 있다 
+- 다른 예로 멤버 참조를 활용해 문자열을 첫 글자에 따라 분류하는 코드를 보자 
+```kotlin
+val list = listOf("a", "ab", "b")
+println(list.groupBy(String::first)) //{a=[a, ab], b=[b]}
+```
+- first는 string의 멤버가 아니라 확장함수지만 여전히 멤버 참조를 사용해 first에 접근할 수 있다 
 
 
 

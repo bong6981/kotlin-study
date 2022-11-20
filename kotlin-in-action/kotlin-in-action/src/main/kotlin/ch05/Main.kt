@@ -45,18 +45,24 @@ fun main(args: Array<String>) {
 //    println(people.any(canBeInClub27)) //true
 
     // 5.2.2 ~
-    val list = listOf(1, 2, 3)
-    println(!list.all{it == 3})  // true
-    /**
-     * !를 눈치 채지 못하는 경우가 자주 있다 이럴 땐 any가 더 낫다
-     */
-    println(list.any{it == 3}) // ture any를 사용하려면 술어를 부정해야 한다
+//    val list = listOf(1, 2, 3)
+//    println(!list.all{it == 3})  // true
+//    /**
+//     * !를 눈치 채지 못하는 경우가 자주 있다 이럴 땐 any가 더 낫다
+//     */
+//    println(list.any{it == 3}) // ture any를 사용하려면 술어를 부정해야 한다
+//
+//    val people = listOf(Person("Alice", 27), Person("Bob", 31))
+////    println(people.count(canBeInClub27))
+//    println( people.filter(canBeInClub27).size)
+//    println(people.find(canBeInClub27)) // Person(name=Bob, age=31)
 
-    val people = listOf(Person("Alice", 27), Person("Bob", 31))
-//    println(people.count(canBeInClub27))
-    println( people.filter(canBeInClub27).size)
-    println(people.find(canBeInClub27)) // Person(name=Bob, age=31)
+    //5.2.3 ~
+    val people = listOf(Person("Alice", 27), Person("Bob", 29), Person("Carol", 31))
+    println(people.groupBy { it.age }) //{27=[Person(name=Alice, age=27)], 29=[Person(name=Bob, age=29)], 31=[Person(name=Carol, age=31)]}
 
+    val list = listOf("a", "ab", "b")
+    println(list.groupBy(String::first))
 
 }
 

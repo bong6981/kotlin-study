@@ -636,6 +636,32 @@ map(1) filter (1) map(2) filter (4) map(3) filter (9) map(4) filter (16)
   - 바로 스트림연산 (map, filter 등)을 여러 CPU에서 병렬적으로 실행하는 기능 
   - 여러분이 필요와 사용할 자바 버전에 따라 시퀀스, 스트림 중 적절한 쪽 선택 
 
+## 5.3.2 시퀀스 만들기 
+- 지금까지 예제에서는 asSequence() 호출해 시퀀스 만들었다 
+- 시퀀스 만드는 다른 방법으로 generateSequence함수를 사용할 수 있다 
+- 이 함수는 이전의 원소를 인자로 받아 다음 원소를 계산 
+- 리스트 5.12 generateSequence로 0부터 100까지 자연수의 합을 구하기 
+```kotlin
+    val naturalNumbers = generateSequence(0) { it + 1 }
+    val numbersTo100 = naturalNumbers.takeWhile { it <= 100 }
+    println(numbersTo100.sum()) // 모든 지연 연산은 "sum"의 결과를 계산할 때 수행
+```
+- naturalNumbers, numbersTo100 은 모두 sequence 며 연산을 지연 계산한다 
+- 최종 연산을 수행하기 전(sum)까지는 시퀀스의 각 숫자는 계산 되지 않는다 
+- 시퀀스를 사용하는 일반적인 용례 중 하나는 객체의 조상으로 이뤄진 시퀀스를 만들어 내는 것 
+  - 어떤 객체의 조상이 자신과 같은 타입이고 
+  - 모든 조상의 시퀀스에서 어떤 특성을 알고 싶을 때 
+  - 다음 예제는 어떤 파일의 상위 디렉터리를 뒤지면서 숨김 hidden 속성을 가진 디렉터리가 있는지 검사해서 파일이 감춰진 디렉터리 안에 들어있는지 알아본다 
+  ```kotlin
+  fun File.isInsideHiddenDirectory() =
+  generateSequence(this) { it.parentFile}.any{ it.isHidden}
+  //     val file = File("/Users/svtk/.HiddenDir/a.txt") 
+  // (println&#40;file.isInsideHiddenDirectory&#40;&#41;&#41;)
+  ```
+  - 여기서도 첫번째 원소를 지정하고 시퀀스의 한 원소로부터 다음 원소를 계산하는 방법을 제공함으로써 시퀀스를 만든다 
+  - any를 find로 바꾸면 원하는 디렉터리를 찾을 수도 있다 
+  - 이렇게 시퀀스를 사용하면 조건을 만족하는 디렉토리 찾은 뒤 더이상 상위 디렉터리 뒤지지 않는다 
+  
 
 
 

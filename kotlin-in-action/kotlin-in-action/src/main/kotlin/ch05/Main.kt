@@ -1,5 +1,6 @@
 package ch05
 
+import java.io.File
 import java.util.*
 
 fun main(args: Array<String>) {
@@ -77,22 +78,33 @@ fun main(args: Array<String>) {
 //    println(books.flatMap { it.authors }) // [Jasper Fforde, Terry Pratchett, Terry Pratchett, Neil Gaiman]
 
     //5.3 ~
-    val people = listOf(Person("Alice", 27), Person("Bob", 29), Person("Carol", 31))
-    println(people.map(Person::name).filter { it.startsWith("A") })
+//    val people = listOf(Person("Alice", 27), Person("Bob", 29), Person("Carol", 31))
+//    println(people.map(Person::name).filter { it.startsWith("A") })
+//
+//    people.asSequence()
+//        .map(Person::name)
+//        .filter { it.startsWith("A") }
+//        .toList()
+//
+//    listOf(1, 2, 3, 4).asSequence()
+//        .map { print("map($it) "); it * it }
+//        .filter { print("filter ($it) "); it % 2 == 0 }
+//        .toList() // map(1) filter (1) map(2) filter (4) map(3) filter (9) map(4) filter (16)
+//
+//    println(listOf(1, 2, 3, 4).asSequence()
+//        .map { it * it }.find{ it > 3}) // 4
+//
+    //5.3.2 ~
+    val naturalNumbers = generateSequence(0) { it + 1 }
+    val numbersTo100 = naturalNumbers.takeWhile { it <= 100 }
+    println(numbersTo100.sum()) // 모든 지연 연산은 "sum"의 결과를 계산할 때 수행 // 5050
 
-    people.asSequence()
-        .map(Person::name)
-        .filter { it.startsWith("A") }
-        .toList()
-
-    listOf(1, 2, 3, 4).asSequence()
-        .map { print("map($it) "); it * it }
-        .filter { print("filter ($it) "); it % 2 == 0 }
-        .toList() // map(1) filter (1) map(2) filter (4) map(3) filter (9) map(4) filter (16)
-
-    println(listOf(1, 2, 3, 4).asSequence()
-        .map { it * it }.find{ it > 3}) // 4
+    val file = File("/Users/svtk/.HiddenDir/a.txt")
+    println(file.isInsideHiddenDirectory())
 }
+
+fun File.isInsideHiddenDirectory() =
+    generateSequence(this) { it.parentFile}.any{ it.isHidden}
 
 
 fun Person.isAdult() = age >= 21

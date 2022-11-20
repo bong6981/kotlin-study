@@ -65,17 +65,25 @@ fun main(args: Array<String>) {
 //    println(list.groupBy(String::first))
 
     //5.2.4 ~
-    val strings = listOf("abc", "def")
-    println(strings.flatMap { it.toList() })
+//    val strings = listOf("abc", "def")
+//    println(strings.flatMap { it.toList() })
+//
+//    val books = listOf(
+//        Book("Thursday Next", listOf("Jasper Fforde")),
+//        Book("Mort", listOf("Terry Pratchett")),
+//        Book("Good Omens", listOf("Terry Pratchett", "Neil Gaiman"))
+//    )
+//    println(books.flatMap { it.authors }.toSet()) // [Jasper Fforde, Terry Pratchett, Neil Gaiman]
+//    println(books.flatMap { it.authors }) // [Jasper Fforde, Terry Pratchett, Terry Pratchett, Neil Gaiman]
 
-    val books = listOf(
-        Book("Thursday Next", listOf("Jasper Fforde")),
-        Book("Mort", listOf("Terry Pratchett")),
-        Book("Good Omens", listOf("Terry Pratchett", "Neil Gaiman"))
-    )
-    println(books.flatMap { it.authors }.toSet()) // [Jasper Fforde, Terry Pratchett, Neil Gaiman]
-    println(books.flatMap { it.authors }) // [Jasper Fforde, Terry Pratchett, Terry Pratchett, Neil Gaiman]
+    //5.3 ~
+    val people = listOf(Person("Alice", 27), Person("Bob", 29), Person("Carol", 31))
+    println(people.map(Person::name).filter { it.startsWith("A") })
 
+    people.asSequence()
+        .map(Person::name)
+        .filter { it.startsWith("A") }
+        .toList()
 }
 
 

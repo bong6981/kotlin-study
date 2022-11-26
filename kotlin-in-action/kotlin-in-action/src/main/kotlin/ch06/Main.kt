@@ -33,11 +33,23 @@ fun main(args: Array<String>) {
 //    getTheBestPersonInTheWorld()?.let { sendToEmail(it.email) }
 
     //6.1.9 ~
-    verifyUserInput(" ")
-    verifyUserInput(null)
+//    verifyUserInput(" ")
+//    verifyUserInput(null)
 
-
+    // 6.1.10
+//    printHashCode(null) // T 타입은 Any? 로 추론된다
+//    println(null.hasCode())
 }
+
+fun <T: Any> printHashCode(t: T) { // 이제 T는 널이 될 수 없는 타입
+    println(t.hashCode())
+}
+
+//fun <T> printHashCode(t: T) {
+//    println(t.hashCode()) //
+//    println(t?.hashCode()) // t가 널이 될수 있어서 안전한 호출을 써야만 한다
+//}
+
 
 fun String?.isNullOrBlank(): Boolean = // 널이 될 수 있는 String 의 확장
     this == null || this.isBlank() // 두번째 this 에는 스마트 캐스트 적용

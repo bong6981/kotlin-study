@@ -236,3 +236,60 @@ class CopyRowAction(val list: JList<String>): AbstractAction() {
   - 어떤 값이 널이었는지 확실히 하기 위해 !! 단언문을 한 줄에 함께 쓰는 일을 피하라 
   - person.company!!.address!.country // 이런 식으로 코드 작성하지 말라 
 - 널이 될 수 있는 값을 널이 아닌 값만 인자로 받는 함수에 넘기려면 어떻게 해야 할까? let (계속)
+
+## 6.1.7 let 함수 
+
+- let 함수를 안전한 호출 연산자와 함께 사용하면 원하는 식을 평가해서 결과가 널인지 검사한 다음에 그 결과를 변수에 넣는 작업을 간단한 식을 사용해 한 꺼번에 처리할 수 있다
+- let 을 사용하는 가장 흔한 용례는 널이 될 수 있는 값을 널이 아닌 값만 인자로 받는 함수에 넘기는 경우다. 
+```kotlin
+fun sendEmailTo(email: String){}
+
+val email: String? = ""
+//    sendToEmail(email) // Type mismatch: inferred type is String? but String was expected
+```
+- 이 함수에게 널이 될 수 있는 타입의 값을 넘길 수는 없다 
+```kotlin
+if (email != null) sendToEmail(email)
+```
+- 하지만 let 함수를 통해 인자를 전달 할 수도 있다 
+  - let 함수는 자신의 수신 객체를 인자로 전달 받은 람다에게 넘긴다 
+  - 널이 될 수 있는 값에 대해 안전한 호출 구문을 사용해 let 을 호출하되 널이 될 수 없는 타입을 인자로 받는 람다를 let에 전달한다 
+  - 이렇게 하면 널이 될 수 있는 타입의 값을 널이 될 수 없는 타입의 값으로 바꿔서 람다에게 전달하게 된다 
+```kotlin
+    email?.let { sendToEmail(email) }
+```
+- let 함수는 ?. 덕분에 이메일 주소 값이 널이 아닐 때만 호출된다. 
+- it 을 사용하여 더 간결하게 
+```kotlin
+    email?.let { sendToEmail(it) }
+```
+- 다음이 이 패턴을 보여주는 더 복잡한 예 
+- 리스트 6.9 let 을 사용해 null 이 아닌 인자로 함수 호출하기 
+```kotlin
+fun sendToEmail(email: String) {
+    println("Sending email to $email")
+}
+//
+//var email: String? = "yole@example.com"
+//email?.let { sendToEmail(it) } // Sending email to yole@example.com
+//
+//email = null
+//email?.let { sendToEmail(it) } //
+```
+- 아주 긴식이 있고 그 값이 널이 아닐 때 수행해야 하는 로직이 있을 때 let을 쓰면 훨씬 더 편하다 
+- let을 쓰면 긴 식의 결과를 저장하는 변수를 따로 만들 필요가 없다 
+- 다음 명시인 if 검사가 있다고 치자 
+```kotlin
+    val person: Person3? = getTheBestPersonInTheWorld()
+    if (person != null) sendToEmail(person.email)
+```
+- 굳이 명시적인 변수 person 을 추가할 필요 없디 다음과 같이 쓸 수 있다 
+```kotlin
+    getTheBestPersonInTheWorld()?.let { sendToEmail(it.email) }
+```
+- 만약 getTheBestPersonInTheWorld() 가 null 만을 반환한다면 결코 실행되지 않는다 
+- 여러 값이 널인지 검사해야 한다면 let 호출을 중첩시켜서 처리할 수 있다 
+  - 그렇게 let을 중첩시켜 사용하면 코드가 복잡해져 알아보기 어렵다 
+  - 그런 경우 일반적인 if 를 사용해 모든 값을 한 번에 검사하는 편이 낫다 
+- 자주 발생하는 다른상황 : 실제로는 널이 될 수 없는 프로퍼티 인데 생성자 안에 널이 아닌 값으로 초기화할 방법이 없는 경우 
+  - 이런 상황을 코틀린에서는 어떻게 처리할지 (계속)

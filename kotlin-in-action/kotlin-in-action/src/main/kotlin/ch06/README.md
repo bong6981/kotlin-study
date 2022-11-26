@@ -293,3 +293,69 @@ fun sendToEmail(email: String) {
   - 그런 경우 일반적인 if 를 사용해 모든 값을 한 번에 검사하는 편이 낫다 
 - 자주 발생하는 다른상황 : 실제로는 널이 될 수 없는 프로퍼티 인데 생성자 안에 널이 아닌 값으로 초기화할 방법이 없는 경우 
   - 이런 상황을 코틀린에서는 어떻게 처리할지 (계속)
+
+# 6.1.8 나중에 초기화할 프로퍼티 
+- 객체 인스턴스를 일단 생성한 다음에 나중에 초기화하는 프레임워크가 많다 
+  - 예를 들어 안드로이드에서는 onCreate 에서 액티비티를 초기화한다 
+  - 제이유닛에서는 @Before 로 애노테이션된 메서드 안에서 초기화 로직을 수행해야만 한다 
+- 하지만 코틀린에서는 클래스 안의 널이 될 수 없는 새ㅇ성자 안에서 초기화하지 않고 특별한 메서드 안에서 초기화할 수는 없다 
+- 코틀린은 일반적으로 생성자에서 모든 프로퍼티를 초기화해야 한다 
+- 게다가 프로퍼티 타입이 널이 될 수 없는 타입이라면 반드시 널이 아닌 값으로 그 프로퍼티를 초기화해야 한다 
+- 그런 초기화 값을 제공할 수 없으면 널이 될 수 있는 타입을 사용할 수밖에 없다. 
+- 하지만 널이 될 수 있는 타입을 사용하면 모든 프로퍼티 접근에 널 검사를 넣거나 !! 연산자를 써야 한다 
+- 리스트 6.10 널 아님 단언을 사용해 널이 될 수 있는 프로퍼티 접근하기 
+```kotlin
+package ch05
+
+class MyService {
+    fun performAction(): String = "foo"
+}
+
+class MyTest {
+    private var myService: MyService? = null // null 로 초기화하기 위해 널이 될 수 있는 타입으로 선언
+
+    @Before fun setUp() {
+        myService = MyService() // setUp 에서 진짜 초깃값을 지정 
+    }
+    
+    @Test fun testAction() {
+        Assert.assertEquals("foo", 
+        myService!!.performAction()) // 반드시 널 가능성에 신경써야 한다. !!나 ? 를 꼭 써야 한다 
+    }
+}
+
+```
+- 이 코드는 보기 나쁘다. 특히 프로퍼티를 여러 번 사용해야 하면 코드가 더 못생겨진다. 
+- 이를 해결하기 위해 myService 프로퍼티를 나중에 초기화 할 수 있다 
+- lateinit 변경자를 붙이면 프로퍼티를 나중에 초기화 할 수 있다 
+```kotlin
+package ch05
+
+class MyService {
+    fun performAction(): String = "foo"
+}
+
+class MyTest {
+    private lateinit var myService: MyService // 초기화하지 않고 널이 될 수 없는 프로퍼티 선언
+
+    @Before fun setUp() {
+        myService = MyService() // setUp 에서 진짜 초깃값을 지정 
+    }
+    
+    @Test fun testAction() {
+        Assert.assertEquals("foo", 
+        myService.performAction()) // 널 검사 수행하지 않고 프로퍼티 사용
+    }
+}
+
+```
+- 나중에 초기화하는 프로퍼티는 항상 var이어야 한다 
+  - val 프로퍼티는 final 필드로 컴파일 되며 생성자 안에서 반드시 초기화 해야 한다 
+- 나중에 초기화하는 프로퍼티는 널이 될 수 없는 타입이라 해도 더 이상 생성자 안에서 초기화할 필요가 없다 
+- 그 프로퍼티를 초기화하기 전에 프로퍼티에 접근하면 "lateinit property mySerivce has not initialized" 라는 예외 발생 
+- 예외를 보면 어디가 잘못되 있는지 확실히 알 수 있고 nullPointerException보다 훨씬 좋다 
+- 노트 
+  - lateinit 프로퍼티를 의존관계 주입 프레임워크와 함께 사용하는 경우가 많다 
+  - 그런 시나리오에서는 lateinit 프로퍼티 값을 di 프레임 워크가 외부에서 설정해준다 
+  - 다양한 자바 프레임워크와의 호환성을 위해 코틀린은 lateinit 가 지정된 프로퍼티와 가시성이 똑같은 필드를 생성해준다 
+  - 어떤 프로퍼티가 public이라면 코틀린이 생성한 필드도 public 

@@ -125,3 +125,48 @@ fun Person.countryName(): String {
 }
 ```
 
+## 6.1.4 엘비스 연산자 ?:
+- 코틀린은 null 대신 사용할 디폴트 값을 지정할 때 편리하게 사용할 수 있는 연산자 제공 
+- 엘비스 연산자 elvis 
+```kotlin
+fun foo(s: String?) {
+    val t: String = s ?:"" // s가 null이면 ""
+}
+```
+- 좌항 값이 널이 아니면 좌항 값을 결과로 하고 좌항 값이 널이면 우항 값을 결과로 한다 
+- 엘비스 연산자를 객체가 널인 경우 널을 반환하는 안전한 호출 연산자와 함께 사용해서 객체가 널인 경우에 대비한 값을 지저장하는 경우도 많다 
+- 리스트 6.3엘비스 연산자 이용해 널 값 다루기 (6.1 리스트 줄여쓰기)
+```kotlin
+fun strLenSafe(s: Stirng?): Int = s?.length ?: 0
+```
+```kotlin
+fun Person.countryName() = company?.address?.country ?: "Unknown"
+```
+- 코틀린이세너는 return, throw 등의 연산도 식이다 
+- 그래서 엘비스 연산자 우항에 return, throw 넣을 수 있고 엘비스 연산자 더 편하게 상용할 수 있다 
+- 그런 경우 엘비스 연산자 좌항이 널이면 함수가 즉시 어떤 값 반환 혹은 예외를 던진다 
+- 이런 패턴은 함수의 전제 조건을 검사하는 경우 특히 예외 
+- 리스트 6.5 throw 와 엘비스 연산자 함께 사용하기 
+```kotlin
+package ch06
+
+class Address(val streetAddress: String, val zipCode: Int,
+val city: String, val country: String)
+
+class Company(val name: String, val address: Address?)
+
+class Person(val name: String, val company: Company?)
+
+
+fun printShippingLabel(person: Person) {
+    val address = person.company?.address
+        ?: throw IllegalArgumentException("No address") // 주소 없으면 예외
+    with (address) {
+        println(streetAddress)
+        println("$zipCode $city, $country")
+    }
+}
+
+
+```
+

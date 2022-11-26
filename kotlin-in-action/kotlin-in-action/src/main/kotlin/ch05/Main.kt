@@ -95,12 +95,15 @@ fun main(args: Array<String>) {
 //        .map { it * it }.find{ it > 3}) // 4
 //
     //5.3.2 ~
-    val naturalNumbers = generateSequence(0) { it + 1 }
-    val numbersTo100 = naturalNumbers.takeWhile { it <= 100 }
-    println(numbersTo100.sum()) // 모든 지연 연산은 "sum"의 결과를 계산할 때 수행 // 5050
+//    val naturalNumbers = generateSequence(0) { it + 1 }
+//    val numbersTo100 = naturalNumbers.takeWhile { it <= 100 }
+//    println(numbersTo100.sum()) // 모든 지연 연산은 "sum"의 결과를 계산할 때 수행 // 5050
+//
+//    val file = File("/Users/svtk/.HiddenDir/a.txt")
+//    println(file.isInsideHiddenDirectory())
 
-    val file = File("/Users/svtk/.HiddenDir/a.txt")
-    println(file.isInsideHiddenDirectory())
+    //5.4.1 ~
+    createAllDoneRunnable().run()
 
 
 }
@@ -130,4 +133,8 @@ fun printProblemCounts(responses: Collection<String>) {
         }
     }
     println("$clientErrors client errors, $severErrors server errors")
+}
+
+fun createAllDoneRunnable(): Runnable {
+    return Runnable { println("All done!") }
 }

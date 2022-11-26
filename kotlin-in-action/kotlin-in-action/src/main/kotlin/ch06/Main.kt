@@ -21,18 +21,31 @@ fun main(args: Array<String>) {
 //    email?.let { sendToEmail(email) }
 //    email?.let { sendToEmail(it) }
 
-    var email: String? = "yole@example.com"
-    email?.let { sendToEmail(it) } // Sending email to yole@example.com
+//    var email: String? = "yole@example.com"
+//    email?.let { sendToEmail(it) } // Sending email to yole@example.com
+//
+//    email = null
+//    email?.let { sendToEmail(it) } //
+//
+//    val person: Person3? = getTheBestPersonInTheWorld()
+//    if (person != null) sendToEmail(person.email)
+//
+//    getTheBestPersonInTheWorld()?.let { sendToEmail(it.email) }
 
-    email = null
-    email?.let { sendToEmail(it) } //
-
-    val person: Person3? = getTheBestPersonInTheWorld()
-    if (person != null) sendToEmail(person.email)
-
-    getTheBestPersonInTheWorld()?.let { sendToEmail(it.email) }
+    //6.1.9 ~
+    verifyUserInput(" ")
+    verifyUserInput(null)
 
 
+}
+
+fun String?.isNullOrBlank(): Boolean = // 널이 될 수 있는 String 의 확장
+    this == null || this.isBlank() // 두번째 this 에는 스마트 캐스트 적용
+
+fun verifyUserInput(input: String?) {
+    if (input.isNullOrBlank()) { // 안전한 호출을 하지 않아도 된다
+        println("Please fill in the required fields")
+    }
 }
 
 

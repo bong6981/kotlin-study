@@ -148,7 +148,6 @@ fun Person.countryName() = company?.address?.country ?: "Unknown"
 - 이런 패턴은 함수의 전제 조건을 검사하는 경우 특히 예외 
 - 리스트 6.5 throw 와 엘비스 연산자 함께 사용하기 
 ```kotlin
-package ch06
 
 class Address(val streetAddress: String, val zipCode: Int,
 val city: String, val country: String)
@@ -169,4 +168,37 @@ fun printShippingLabel(person: Person) {
 
 
 ```
+
+## 6.1.5 안전한 캐스트: as? 
+- as를 사용할 때마다 is 를 통해 미리 as 로 변경 가능한 타입인지 검사해볼 수도 잇다 
+- 더 좋은 해법은 
+  - as? 어떤 값을 지정한 타입으로 캐스트 
+  - 값을 대상으로 타입으로 변환할 수 없으면 null 반환 
+- 리스트 6.6 안전한 연산자 사용해 equals 구현
+```kotlin
+package ch06
+
+class Person1 (val firstName: String, val lastName: String) {
+    override fun equals(other: Any?): Boolean {
+        val otherPerson = other as? Person1 ?: return  false // 타입 불일치 false 반환
+
+        return otherPerson.firstName == firstName &&
+                otherPerson.lastName == lastName // 안전한 캐스트 후 Person1 로 스마트 캐스트
+    }
+
+    override fun hashCode(): Int =
+        firstName.hashCode() * 37 + lastName.hashCode()
+}
+
+fun main(args: Array<String>) {
+  val p1 = Person1("Dmitry", "Jemerov")
+  val p2 = Person1("Dmitry", "Jemerov")
+  println(p1 == p2) // == 연산자는 equals 메서드 호출
+  println(p1.equals(42))
+}
+```
+
+- 이 패턴을 이용하면 파라미터로 받은 값이 원하는 타입인지 쉽게 검사, 캐스트, 타입이 맞지 않으면 false 반환 
+- 이 모든 동작을 한 식으로 해결 가능 
+- 컴파일러에게 어떤 값이 널이 아니라는 사실을 알려주고 싶을 때 (계속)
 

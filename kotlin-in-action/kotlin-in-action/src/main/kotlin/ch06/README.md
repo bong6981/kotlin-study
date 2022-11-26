@@ -94,4 +94,34 @@ println(strLenSafe("abc"))
   - 따라서 코틀린에서는 널이 될 수 있는 타입을 처리하는 데 별도의 실행 시점 부가 비용이 들지 않는다 
 - 이제 코틀린에서 널이 될 수 있는 타입을 어떻게 다루는지와 널이 될 수 있는 타입을 다루더라도 전혀 불편하지 않는 이유를 살펴보자 
 
-#
+## 6.1.3 안전한 호출 연산자: ?.
+- ?. 은 null 검사와 메서드 호출을 한 번의 연산으로 수행 
+- s?.toUpperCase() 는 if (s != null) s.toUpperCase() else null 과 같다 
+- 호출하려는 값이 null 이 아니라면 ?. 는 일반 메서드 호출처럼 작동한다. 
+  - 호출하려는 값이 null이면 이 호출은 무시되고 null이 결과 값이 된다 
+- 안전한 호출의 결과 타입도 널이 될 수 있는 타입이라는 점에 유의 
+  - String.toUpperCase 는 String 타입의 값을 반환 
+  - s 가 널이 될 수 있는 타입인 경우 s?.toUpperCase() 식의 결과 타입은 String? 이다 
+- 프로퍼티 읽거나 쓸 때도 안전한 호출 사용 가능 
+- 리스트 6.2 널이 될 수 있는 프로퍼티 다루기 위해 안전한 호출 사용하기 
+```kotlin
+class Employee(val name: String, val manager: Employee?)
+
+fun managerName(employee: Employee): String? = employee.manager?.name
+
+val ceo = Employee("Bob, null") // println(managerName(ceo)) // null
+```
+- 객체 그래프에서 널이 될 수 있는 중간 객체가 여럿 있다면 안전한 호출을 연쇄해서 사용하면 펼할 때가 자주 있다 
+```kotlin
+class Address(val streetAddress: String, val zipCode: Int,
+val city: String, val country: String) 
+
+class Company(val name: String, val address: Address?)
+
+class Person(val name: String, val company: Company?)
+
+fun Person.countryName(): String {
+    return company?.address?.country ?: "Unknown"
+}
+```
+

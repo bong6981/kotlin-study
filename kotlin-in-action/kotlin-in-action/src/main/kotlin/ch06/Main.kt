@@ -42,13 +42,21 @@ fun main(args: Array<String>) {
 //    println(null.hasCode())
 
     // 6.1.11
-    val person = PersonJava(null)
-//    yellAt(person)
+//    val person = PersonJava(null)
+////    yellAt(person)
+//
+////    val i: Int = person.name
+//
+//    val name1: String = person.name
+//    val name2: String? = person.name
 
-//    val i: Int = person.name
+    // 6.1.12
+    showProgress(146)
+}
 
-    val name1: String = person.name
-    val name2: String? = person.name
+fun showProgress(progress: Int) {
+    val percent = progress.coerceIn(0, 100)
+    println("We're ${percent}% done!")
 }
 
 fun yellAt(person: PersonJava) {

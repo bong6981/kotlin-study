@@ -202,3 +202,37 @@ fun main(args: Array<String>) {
 - 이 모든 동작을 한 식으로 해결 가능 
 - 컴파일러에게 어떤 값이 널이 아니라는 사실을 알려주고 싶을 때 (계속)
 
+## 6.1.6 널이 아님 단언 : !! 
+- !! 어떤 값이든 널이 될 수 없는 타입으로 강제로 바꿀 수 있다 
+```kotlin
+fun ignoreNulls(s: String?) {
+    val sNotNull: String = s!! // 예외가 터지면 이 지점을 가리킨다 
+    println(sNotNull.length)
+}
+
+//     ignoreNulls(null)
+
+```
+- !! 는 컴파일러가에게 난 null 이 아니라고 확신하니 예외가 발생해도 상관없음을 감언 
+  - !! 못생김 : 코틀린 설계자들은 다른 방법을 찾아봐! 하는 것 
+- !! 가 더 나은 해법인 경우가 있다 
+  - 어떤 함수가 값이 널인지 검사한 다음에 다른 함수 호출해도 
+  - 컴파일러는 호출된 함수가 언제나 다른 함수에서 널이 아닌 값을 전달받는 사실을 인식할 수 없을 때 
+- 실무에서는 이에 해당하는 예제가 스윙과 같은 다양한 ui 프레임워크에 있는 액션 클래스에서 이런 일이 발생한다 
+```kotlin
+class CopyRowAction(val list: JList<String>): AbstractAction() {
+    override fun isEnabled(): Boolean =
+        list.selectedValue != null
+
+    override fun actionPerformed(e: ActionEvent?) {
+        val value = list.selectedValue!! // actionPerformed는 isEnabled가 "true"인 경우에만 호출 
+    }
+}
+```
+- 이 경우 !! 를 사용하지 않으려면 val value = list.selectedValue ?: return 처럼 널이 될 수 없는 타입의 값을 얻어야 한다 
+  - 이런 패턴을 사용하면 list.selectedValue 가 null 이면 함수가 조기 종료되므로 함수의 나머지 본문에서는 value가 항상 널이 아니게 된다 
+- !! 를 널에 대해 사용해서 발생하는 예외의 스택 트레이스 strace 에는 어떤 파일의 몇 번 째 줄인지에 대한 정보는 들어있지만 
+  - 어떤 식에서 예외가 발생했는지에 대한 정보는 들어있지 않다 
+  - 어떤 값이 널이었는지 확실히 하기 위해 !! 단언문을 한 줄에 함께 쓰는 일을 피하라 
+  - person.company!!.address!.country // 이런 식으로 코드 작성하지 말라 
+- 널이 될 수 있는 값을 널이 아닌 값만 인자로 받는 함수에 넘기려면 어떻게 해야 할까? let (계속)

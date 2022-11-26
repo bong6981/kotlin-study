@@ -51,9 +51,27 @@ fun main(args: Array<String>) {
 //    showProgress(146)
 
     //6.2.2
-    println(Person4("Sam", 35).isOrderThan(Person4("Any", 42)))
-    println(Person4("Sam", 35).isOrderThan(Person4("Any")))
+//    println(Person4("Sam", 35).isOrderThan(Person4("Any", 42)))
+//    println(Person4("Sam", 35).isOrderThan(Person4("Any")))
+
+    //6.2.3
+//    val i = 1
+//    val l: Long = i //  Type mismatch: inferred type is Int but Long was expected
+
+//    val i = 1
+//    val l: Long = i.toLong()
+
+//    val x = 1 // int 타입 변수
+////    val list = listOf(1L, 2L, 3L)
+////    x in list
+//    println(x.toLong() in listOf(1L, 2L, 3L)) // true
+
+    val b: Byte = 1
+    val l = b + 1L
+    foo(42)
 }
+
+fun foo(l: Long) = println(l)
 
 fun showProgress(progress: Int) {
     val percent = progress.coerceIn(0, 100)

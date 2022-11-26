@@ -1,6 +1,7 @@
 package ch06
 
 import ch03.lastchar
+import java.util.*
 
 class Main
 
@@ -39,7 +40,27 @@ fun main(args: Array<String>) {
     // 6.1.10
 //    printHashCode(null) // T 타입은 Any? 로 추론된다
 //    println(null.hasCode())
+
+    // 6.1.11
+    val person = PersonJava(null)
+//    yellAt(person)
+
+//    val i: Int = person.name
+
+    val name1: String = person.name
+    val name2: String? = person.name
 }
+
+fun yellAt(person: PersonJava) {
+    println((person.name ?: "AnyOne").toUpperCase() + "! ! !") // ANYONE! ! !
+}
+
+//fun yellAt(person: PersonJava) {
+//    println(person.name)
+//    println(person.name.toUpperCase() + " ! ! !")
+//    // toUpperCase 수신 객체인 person.name이 널이라 예외가 발생한다
+//    // person.name must not be null
+//}
 
 fun <T: Any> printHashCode(t: T) { // 이제 T는 널이 될 수 없는 타입
     println(t.hashCode())
@@ -77,4 +98,16 @@ fun ignoreNulls(s: String?) {
 
 fun sendToEmail(email: String) {
     println("Sending email to $email")
+}
+
+class StringPrinter: StringProcessor {
+    override fun process(value: String) {
+        println(value)
+    }
+}
+
+class NullableStringPrinter: StringProcessor {
+    override fun process(value: String?) {
+        println(value)
+    }
 }

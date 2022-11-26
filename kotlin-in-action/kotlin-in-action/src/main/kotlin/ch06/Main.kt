@@ -1,8 +1,5 @@
 package ch06
 
-import ch03.lastchar
-import java.util.*
-
 class Main
 
 fun main(args: Array<String>) {
@@ -51,7 +48,11 @@ fun main(args: Array<String>) {
 //    val name2: String? = person.name
 
     // 6.1.12
-    showProgress(146)
+//    showProgress(146)
+
+    //6.2.2
+    println(Person4("Sam", 35).isOrderThan(Person4("Any", 42)))
+    println(Person4("Sam", 35).isOrderThan(Person4("Any")))
 }
 
 fun showProgress(progress: Int) {
@@ -98,7 +99,7 @@ data class Person3(val email: String)
 //}
 
 
-fun getTheBestPersonInTheWorld(): Person3? = null
+fun getTheBestPersonInTheWorld(): Person4? = null
 fun ignoreNulls(s: String?) {
     val sNotNull: String = s!!
     println(sNotNull.length)

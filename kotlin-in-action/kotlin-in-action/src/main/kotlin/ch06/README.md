@@ -778,7 +778,7 @@ class NoResultProcessor: Processor<Unit> {
 - 어쩌면 자바 등의 명령형 프로그래밍 언에어서 관례적으로 사용해온 void 라는 이름을 사용할 수 있겠지만 
 - 코틀린에는 nothing 이라는 전혀 다른 기능을 하는 타입이 하나 존재한다. void, nothing 두 이름은 의미가 비슷해 혼란을 야기 하기 쉽다 
 
-## 6.2.6 
+## 6.2.6 Nothing 타입: 이 함수는 결코 정상적으로 끝나지 않는다 
 - 코틀린에는 결코 성공적으로 값을 돌려주는 일이 없으므로 반환 값이라는 개념 자체가 의미 없는 함수가 일부 존재한다 
   - 예를 들어 테스트 라이브러리들은 fail 이라는 함수를 제공하는 경우가 많다 
   - fail은 특별한 메시지가 들어있는 예외를 던져서 현재 테스트를 실패시킨다 
@@ -806,3 +806,59 @@ println(address.city)
 - 이 예제는 Nothing 이 얼마나 유용한지 보여준다 
   - 컴파일러는 Nothing 이 반환 타입인 함수가 결코 정상 종료되지 않음을 알고 
   - 그 함수를 호출하는 코드를 분석할 때 사용한다 
+
+# 6.3 컬렉션과 배열 
+
+## 6.3.1 널 가능성과 컬렉션 
+- 컬렉션 안에 널 값을 넣을 수 있는지 여부는 어떤 변수의 값이 널이 될 수 있는지 여부와 마찬가지로 중요하다 
+```kotlin
+fun readNumbers(reader: BufferedReader): List<Int?> {
+    val result = ArrayList<Int?>() // 널이 될 수 있는 int 값으로 이뤄진 리스트 만들기
+    for (line in reader.lineSequence()) {
+        try {
+            val number = line.toInt()
+            result.add(number) // (널이 아닌 정수) 를 리스트에 추가한다 
+        } catch (e: NumberFormatException) {
+            result.add(null) // 현재 줄을 파싱할 수 없으므로 리스트에 널을 추가한다 
+        }
+    }
+    return result
+}
+```
+- List<Int?>는 Int? 타입의 값을 저장할 수 있다 (Int, null 저장 가능)
+- 코틀린 1.1 부터는 파싱에 실패하면 null 을 반환하는 String.toIntOrNull 을 사용해 예제를 더 줄일 수 있다 
+- 어떤 변수 타입의 널 가능성과 타입 파라미터로 쓰이는 타입의 널 가능성의 차이를 살표보자 
+  - List<Int?>, List<Int>?
+  - 첫번째 경우 리스트 자체는 항상 널이 아니다 
+    - 하지만 리스트에 들어있는 각 원소는 널이 될 수도 있다 
+  - 두 번째 경우 리스트를 가리키는 변수에는 널이 들어갈 수 있지만 리스트 안에는 널이 아닌 값만 들어간다
+- 널이 될 수 있는 값으로 이뤄진 널이 될 수 있는 리스트 List<Int?>?
+  - 이런 리스트 처리할 때는 
+    - 변수에 대해 널 검사 수행한 다음
+    - 그 리스트에 속한 모든 원소에 대해 다시 널 검사 수행해야 한다. 
+
+```kotlin
+fun addValidNumbers(numbers: List<Int?>) {
+    var sumOfValidNumbers = 0
+    var invalidNumbers = 0
+    for (number in numbers) {
+        if (number != null)
+            sumOfValidNumbers += number
+        else
+            invalidNumbers++
+    }
+    println("Sum of ValidNumbers: $sumOfValidNumbers")
+    println("Invalid Numbers: $invalidNumbers")
+}
+```
+- 리스트의 원소에 접근하면 Int? 타입의 값을 얻고, 따라서 그 값을 산술 식에 사용하기 전에 널 여부 검사 
+- 널이 될 수 있는 값으로 이뤄진 컬렉션으로 널 값을 걸러내는 경우가 자주 있어서 코틀린 표준 라이브러리는 그런 일을 하는 filterNotNull이라는 함수를 제공한다 
+- filterNotNull 함수 사용해 더 단순하게 만들기 
+```kotlin
+fun addValidNumbers(numbers: List<Int?>) {
+    val validNumbers = numbers.filterNotNull()
+    println("Sum of ValidNumbers: ${validNumbers.sum()}")
+    println("Invalid Numbers: ${numbers.size - validNumbers.size}")
+}
+```
+- filterNotNull 가 컬렉션 안에 널이 들어있지 않음을 보장 -> validNumbers 는 List<Int>

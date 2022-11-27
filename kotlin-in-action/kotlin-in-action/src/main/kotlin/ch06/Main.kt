@@ -1,5 +1,8 @@
 package ch06
 
+import java.io.BufferedReader
+import java.lang.NumberFormatException
+
 class Main
 
 fun main(args: Array<String>) {
@@ -69,6 +72,40 @@ fun main(args: Array<String>) {
     val b: Byte = 1
     val l = b + 1L
     foo(42)
+}
+
+fun addValidNumbers(numbers: List<Int?>) {
+    val validNumbers = numbers.filterNotNull()
+    println("Sum of ValidNumbers: ${validNumbers.sum()}")
+    println("Invalid Numbers: ${numbers.size - validNumbers.size}")
+}
+
+
+//fun addValidNumbers(numbers: List<Int?>) {
+//    var sumOfValidNumbers = 0
+//    var invalidNumbers = 0
+//    for (number in numbers) {
+//        if (number != null)
+//            sumOfValidNumbers += number
+//        else
+//            invalidNumbers++
+//    }
+//    println("Sum of ValidNumbers: $sumOfValidNumbers")
+//    println("Invalid Numbers: $invalidNumbers")
+//}
+
+
+fun readNumbers(reader: BufferedReader): List<Int?> {
+    val result = ArrayList<Int?>() // 널이 될 수 있는 int 값으로 이뤄진 리스트 만들기
+    for (line in reader.lineSequence()) {
+        try {
+            val number = line.toInt()
+            result.add(number) // (널이 아닌 정수) 를 리스트에 추가한다
+        } catch (e: NumberFormatException) {
+            result.add(null) // 현재 줄을 파싱할 수 없으므로 리스트에 널을 추가한다
+        }
+    }
+    return result
 }
 
 interface Processor<T> {

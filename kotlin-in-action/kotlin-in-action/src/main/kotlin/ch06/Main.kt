@@ -71,6 +71,16 @@ fun main(args: Array<String>) {
     foo(42)
 }
 
+interface Processor<T> {
+    fun process(): T
+}
+
+class NoResultProcessor: Processor<Unit> {
+    override fun process() { // Unit 타입을 반환하지만 타입을 지정할 필요 없다
+       // 여기서 return 을 명시할 필요가 없다
+    }
+}
+
 fun foo(l: Long) = println(l)
 
 fun showProgress(progress: Int) {

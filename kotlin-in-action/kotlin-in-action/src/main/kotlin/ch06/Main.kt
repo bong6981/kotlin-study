@@ -69,9 +69,21 @@ fun main(args: Array<String>) {
 ////    x in list
 //    println(x.toLong() in listOf(1L, 2L, 3L)) // true
 
-    val b: Byte = 1
-    val l = b + 1L
-    foo(42)
+//    val b: Byte = 1
+//    val l = b + 1L
+//    foo(42)
+
+    //6.3.2~
+//    val source: Collection<Int> = arrayListOf(3, 5, 7)
+//    val target: Collection<Int> = arrayListOf(1)
+//    copyElements(source, target) // target 에서 컴파일 오류 발생
+}
+
+fun <T> copyElements(source: Collection<T>,
+target: MutableCollection<T>) {
+    for (item in source) { // source 컬렉션의 모든 원소에 대해 루프를 돈다
+        target.add(item) // 변경 가능한 target 컬렉션에 원소를 추가한다
+    }
 }
 
 fun addValidNumbers(numbers: List<Int?>) {

@@ -862,3 +862,48 @@ fun addValidNumbers(numbers: List<Int?>) {
 }
 ```
 - filterNotNull 가 컬렉션 안에 널이 들어있지 않음을 보장 -> validNumbers 는 List<Int>
+
+# 6.3.2 읽기 전용과 변경 가능한 컬렉션 
+- 코틀린 컬렉션, 자바 컬렉션 중요 차이 
+  - 코틀린에서는 컬렉션 안의 데이터에 접근하는 인터페이스와 
+  - 컬렉션 안의 데이터를 변경하는 인터페이스를 분리했다는 점 
+- kotlin.collections.Collection
+  - 이 Collection 인터페이스를 사용하면 컬렉션 안의 원소에 대해 이터레이션하고, 컬렉션 크기 얻고, 어떤 값이 컬렉션 안에 들어있는지 검사하고, 
+  - 컬렉션에서 데이터를 읽는 여러 다른 연산을 수행할 수 있다 
+  - 하지만 Collection 에는 원소를 추가하거나 제거하는 메서드가 없다
+- 컬렉션 데이터 수정하려면 kotlin.collections.MutableCollection 인터페이스 사용
+  - MutableCollection는 일반 인터페이스인 kotlin.collections.Collection를 확자앟면서 우너소를 추가, 삭제, 컬렉션 안의 모든 우너소를 지우는 등의 메서드를 더 제공 
+  - 코드가 가능하면 항상 읽기 전용 인터페이스를 사용하는 것을 일반적인 규칙으로 삼아라 
+    - 코드가 컬렉션을 변경할 필요가 있을 때면 변경 가능한 버전을 사용하라 
+- 콜렉션의 읽기 전용 인터페이스와 변경 가능 인터페이스를 구별한 이유는 
+  - 프로그램에서 데이터에 어떤 일이 벌어지는지를 더 쉽게 이해하기 우ㅣ함 
+  - 어떤 함수가 MutableCollection이 아닌 Collection 타입의 인자를 받으면 그 함수는 컬렉션을 읽기만 하고 변경하지 않는다 
+  - 반면 어떤 함수가 MutableCollection 을 인자로 받으면 그 함수가 컬렉션의 데이터 바꾸리라 가정할 수 있다 
+  - 어떤 컴포넌트의 내부 상태에 컬렉션이 포함된다면 그 컬렉션을 MutableCollection을 인자로 받는 함수에 전달할 때는 어쩌면 원본의 변경을 막기 위해 컬렉션을 복사해야 할 수도 있다 
+    - 이런 패턴을 방어적 복사 defensive copy 라 부른다 
+- 리스트 6.24 읽기 전용과 변경 가능한 컬렉션 인터페이스 
+  - 다음 에서 copyElements 함수가 source 를 변경하지 않지만 target을 변경하리라는 사실을 알 수 있다 
+```kotlin
+fun <T> copyElements(source: Collection<T>, 
+target: MutableCollection<T>) {
+    for (item in source) { // source 컬렉션의 모든 원소에 대해 루프를 돈다 
+        target.add(item) // 변경 가능한 target 컬렉션에 원소를 추가한다 
+    }
+}
+```
+- target 에 해당하는 인자로 읽기 전용 컬렉션을 넘길 수 없다
+  - 실제 그 값(컬렉션)이 변경 가능한 컬렉션인지 여부와 관계없이 선언된 타입이 읽기 전용이라면 
+  - target 에 넘기면 컴파일 오류가 난다 
+```kotlin
+ val source: Collection<Int> = arrayListOf(3, 5, 7)
+    val target: Collection<Int> = arrayListOf(1)
+    copyElements(source, target) // target 에서 컴파일 오류 발생 
+```
+- 컬렉션 인터페이스를 사용할 때 항상 염두에 둬야 할 핵심은 읽기 전용 컬렉션이라고 해서 꼭 변경 불가능한 컬렉션일 필요는 없다는 것 
+  - 읽기 전용 인터페이스 타입인 변수를 사용할 때 그 인터페이스는 실제로 어떤 컬렉션 인스턴스를 가리키는 수 많은 참조 중 하나일 수 있다 
+- 같은 인스턴스를 가리키는 참조를 2개 두고 하나는 변경 불가능 타입 참조, 하나는 변경 가능한 인터페이스 타입의 참조도 있을 수 있다 
+- 이런 상황에서 이 컬렉션을 참조하는 다른 코드를 호출하거나 병렬 실행하면 
+  - 컬렉션을 사용 도중 다른 컬렉션이 이 컬렉션의 내용을 변경하는 상황이 생길 수 있고 
+  - 이런 상황에서는 CounccerentModificationException 이나 다른 오류 발생 가능 
+  - 따라서 읽기 전용 컬렉션이 항상 스레드 안전 하지 않다는 점을 명시 
+  - 다중 스레드 환경에서 데이터를 다루는 경우 그 데이터를 적절히 동기화 하거나 동시 접근을 허용하는 데이터 구조를 활용해야 한다 

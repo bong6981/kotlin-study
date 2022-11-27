@@ -77,6 +77,27 @@ fun main(args: Array<String>) {
 //    val source: Collection<Int> = arrayListOf(3, 5, 7)
 //    val target: Collection<Int> = arrayListOf(1)
 //    copyElements(source, target) // target 에서 컴파일 오류 발생
+
+    //6.3.5 ~
+    for (i in args.indices) {
+        println("Argument $i is: ${args[i]}")
+    }
+
+    val letters = Array<String>(26) { i -> ('a' + i).toString()}
+    println(letters.joinToString(""))
+
+    val strings = listOf("a", "b", "c")
+    println("%s/%s/%s".format(*strings.toTypedArray()))
+
+    val squares = IntArray(5) { i -> (i+1) * (i+1)}
+    println(squares.joinToString()) // 1, 4, 9, 16, 25
+
+    args.forEachIndexed { index, element ->
+        println("Argument $index isn: $element")
+    }
+
+
+
 }
 
 fun <T> copyElements(source: Collection<T>,

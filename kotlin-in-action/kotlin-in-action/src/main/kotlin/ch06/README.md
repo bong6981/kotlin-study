@@ -778,4 +778,31 @@ class NoResultProcessor: Processor<Unit> {
 - 어쩌면 자바 등의 명령형 프로그래밍 언에어서 관례적으로 사용해온 void 라는 이름을 사용할 수 있겠지만 
 - 코틀린에는 nothing 이라는 전혀 다른 기능을 하는 타입이 하나 존재한다. void, nothing 두 이름은 의미가 비슷해 혼란을 야기 하기 쉽다 
 
+## 6.2.6 
+- 코틀린에는 결코 성공적으로 값을 돌려주는 일이 없으므로 반환 값이라는 개념 자체가 의미 없는 함수가 일부 존재한다 
+  - 예를 들어 테스트 라이브러리들은 fail 이라는 함수를 제공하는 경우가 많다 
+  - fail은 특별한 메시지가 들어있는 예외를 던져서 현재 테스트를 실패시킨다 
+  - 다른 예로 무한 루프를 도는 함수도 결코 값을 반환하지 않으며, 정상적으로 끝나지 않는다 
+- 그런 함수를 호출하는 코드를 분석하는 경우 함수가 정상적으로 끝나지 않는다는 사실을 알면 유용하다 
+- 그런 경우를 표현하기 위해 코틀린에는 Nothing 이라는 특별한 반환 타입이 있다 
+```kotlin
 
+ import java.lang.IllegalStateException
+ 
+ fun fail(message: String): Nothing {
+    throw IllegalStateException(message)
+}
+
+// fail("Error occurred")
+```
+- Nothing 값은 아무 값도 포함하지 않는다 
+- 따라서 Nothing 은 함수의 반환 타입이나 반환타입으로 쓰일 파라미터로만 쓸 수 있다 
+- 그 외 다른 용도로 사용하는 경우 Nothing 타입의 변수를 선언하더라도 그 변수에 아무 값도 저장할 수 없으므로 아무 의미도 없다 
+- Nothing 을 반환하는 함수를 엘비스 연잔자 우항에 사용해서 전제 조건을 검사할 수 있다 
+```kotlin
+val address = company.address ?: fail("No address")
+println(address.city)
+```
+- 이 예제는 Nothing 이 얼마나 유용한지 보여준다 
+  - 컴파일러는 Nothing 이 반환 타입인 함수가 결코 정상 종료되지 않음을 알고 
+  - 그 함수를 호출하는 코드를 분석할 때 사용한다 

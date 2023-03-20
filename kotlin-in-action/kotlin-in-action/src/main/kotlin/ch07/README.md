@@ -99,3 +99,33 @@ operator fun Char.times(count: Int) :String {
     println(0x0F or 0xF0) // 255
     println(0x1 shl 4) // 16
     ```
+## 7.1.2 복합 대입 연산자 오버로딩 
+- compound assginment 
+```kotlin
+var point = Point(1, 2)
+point += Point(3, 4)
+println(point) // Point(4, 6)
+```
+- 코틀린이 제공하는 복합 대입 연산자 (위)
+- 경우에 따라 += 를 객체에 대한 참조를 다른 참조로 바꾸기 보다(위) 원래 객체의 내부 상태를 변경하게 하고 싶을 때가 있다
+- 예. 변경 가능 컬렉션에 원소 추가할 때 
+```kotlin
+val numbers = ArrayList<Int>()
+numbers += 42
+println(numbers[0]) // 42
+```
+- 반환 타입이 Unit 인 plusAssign 함수를 정의하면 코틀린은 += 연산자에 그 함수를 사용
+- minusAssign, timesAssign
+```kotlin
+operator fun <T> MutableCollection<T>.plusAssign(element: T) {
+    this.add(element)
+}
+```
+- 이론적으로는 += 를 plus, plushAssign 양쪽으로 컴파일 가능 
+- 어떤 클래스가 이 두 함수를 모두 정의하고 둘 다 += 에 사용 가능한 경우 컴파일러는 오류 보고 
+- 일반 연산자 사용으로 이를 해결
+- var 를 val 로 바꿔서 plusAssign 적용이 불가능하게 만들기 
+- 하지만 왠만하면 plush, plusAssign 연산을 동시에 정의하지 말라 
+- 코틀린 표준 라이브러리는 
+  - `+` 와 `-` 는 항상 새로운 컬렉션 반환
+  - += 와 -= 는 변경을 적용한 복사본을 반환 
